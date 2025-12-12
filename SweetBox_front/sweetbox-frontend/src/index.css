@@ -1,0 +1,179 @@
+:root {
+	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	color: rgba(255, 255, 255, 0.87);
+	background-color: #242424;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: #F6F3EE;
+}
+
+html, body {
+	background-color: #F6F3EE;
+}
+
+a {
+	font-weight: 500;
+	color: #646cff;
+	text-decoration: inherit;
+}
+a:hover {
+	color: #535bf2;
+}
+
+body {
+	justify-content: center;
+	height: center;
+	margin: 0;
+	overflow-x: hidden;
+}
+
+h1 {
+	font-size: 3.2em;
+	line-height: 1.1;
+}
+
+button {
+	border-radius: 8px;
+	border: 1px solid transparent;
+	padding: 0.6em 1.2em;
+	font-size: 1em;
+	font-weight: 500;
+	font-family: inherit;
+	background-color: #1a1a1a;
+	cursor: pointer;
+	transition: border-color 0.25s;
+}
+
+button:hover {
+	border-color: #4B2E2E;
+}
+
+footer {
+	height: 300px;
+	background-color: #ad795b;
+	text-align: center;
+
+}
+
+.botoes {
+	text-align: center;
+}
+
+.botao-inicio {
+	min-width: 200px;
+	margin: 30px;
+	background-color: #ccac99;
+	color: black;
+}
+
+.fundo-rosa {
+	background-color: #ad795b;
+	height: 100vh;
+	text-align: center;
+	line-height: 100vh;
+}
+
+.fundo-transparente {
+	text-align: center;
+	display: flexbox;
+	vertical-align: middle;
+}
+
+.container-esquerda {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	text-align: center;
+}
+
+.subtitulo {
+	margin-top: 50px;
+	color: gray;
+}
+
+.float-left {
+	float: left;
+	position: absolute;
+	margin: 10px;
+}
+
+.botao {
+	background-color: #ccac99;
+	margin: 2px;
+}
+
+.conheca {
+	height: 100vh;
+	padding-top: 50px;
+	text-align: center;
+}
+
+.conheca-quadro {
+	width: 800px;
+	margin: auto;
+	padding: 100px;
+	color: #4B2E2E;
+}
+
+.paragrafo {
+	font-size: 18px;
+	margin-top: 50px;
+	text-align: justify;
+}
+
+.texto-rodape {
+	width: 300px;
+	text-align: left;
+	margin: auto;
+}
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+.pagina {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+main {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 2rem;
+}
+
+.container {
+	max-width: 600px;
+	width: 100%;
+	background-color: #fff8f0;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+footer {
+	background-color: #ad795b;
+	color: white;
+	text-align: center;
+	padding: 1rem;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.borda-escura {
+	border: solid 5px #4b2e2e;
+}
