@@ -15,6 +15,12 @@ public class CategoriaController : ControllerBase
     }
 
     [HttpGet]
+    public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
+    {
+        return Ok(await _context.Categorias.ToListAsync());
+    }
+
+    [HttpGet("categorias")]
     public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasAsync()
     {
         try

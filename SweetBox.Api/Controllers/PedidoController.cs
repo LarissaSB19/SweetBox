@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SweetBox.Data;
 using SweetBox.Api.Models;
+using SweetBox.Api.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -29,11 +30,62 @@ public class PedidoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Pedido>> CreatePedidoAsync(Pedido pedido)
+    public async Task<IActionResult> CreatePedidoAsync([FromBody] PedidoDto pedidoDto)
     {
-        _context.Pedidos.Add(pedido);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetPedidoAsync), new { idPedido = pedido.IdPedido }, pedido);
+        try
+        {
+            var pedido = new Pedido
+            {
+                IdUsuario = pedidoDto.IdCliente,
+                DataPedido = DateTime.Now
+            };
+
+            _context.Pedidos.Add(pedido);
+
+            await _context.SaveChangesAsync();
+
+            decimal totalPedido = 0;
+
+            foreach (var itemDto in pedidoDto.Itens)
+            {
+                var item = new PedidoItem
+                {
+                    IdPedido = pedido.IdPedido,
+                    IdProduto = itemDto.IdProduto,
+                    Quantidade = itemDto.Quantidade,
+                    PrecoUnitario = itemDto.PrecoUnitario
+                };
+
+                _context.PedidoItens.Add(item);
+
+                totalPedido += itemDto.PrecoUnitario;
+
+                if (itemDto.ParametrosBolo != null)
+                {
+                    foreach (var param in itemDto.ParametrosBolo)
+                    {
+                        var itemParametro = new PedidoItemParametroBolo
+                        {
+                            PedidoItem = item,
+                            IdParametro = param.IdParametro,
+                            ValorEscolhido = param.ValorEscolhido
+                        };
+
+                        _context.PedidoItemParametroBolos.Add(itemParametro);
+                    }
+                }
+            }
+
+            pedido.ValorTotal = totalPedido;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(pedido);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erro ao criar pedido: {ex.Message}");
+        }
     }
 
     [HttpPut("{idPedido}")]

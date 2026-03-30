@@ -1,110 +1,118 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5179/api/Usuario";
 
 export default function GerenciarUsuarios() {
-  const [usuarios, setUsuarios] = useState([]);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [usuarioEditandoId, setUsuarioEditandoId] = useState(null);
+const [usuarios, setUsuarios] = useState([]);
+const [modalAberto, setModalAberto] = useState(false);
+const [editando, setEditando] = useState(false);
+const [usuarioEditandoId, setUsuarioEditandoId] = useState(null);
+const navigate = useNavigate();
 
-  const [form, setForm] = useState({ cpf: "", nome: "", email: "", telefone: "", endereco: "", senha: "", idPedido: 1, idPerfil: 3 });
+const [form, setForm] = useState({ cpf: "", nome: "", email: "", telefone: "", endereco: "", senha: "", idPedido: 1, idPerfil: 3 });
 
-  useEffect(() => {
-    carregarUsuarios();
-  }, []);
+useEffect(() => {
+  carregarUsuarios();
+}, []);
 
-  async function carregarUsuarios() {
-    try {
-      const resp = await fetch(API_URL);
-      const data = await resp.json();
-      setUsuarios(data);
-    } catch (err) {
-      console.error("Erro ao carregar usuários:", err);
-    }
+async function carregarUsuarios() {
+  try {
+    const resp = await fetch(API_URL);
+    const data = await resp.json();
+    setUsuarios(data);
+  } catch (err) {
+    console.error("Erro ao carregar usuários:", err);
   }
+}
 
-  const abrirModalCriar = () => {
-    setEditando(false);
-    setForm({ cpf: "", nome: "", email: "", telefone: "", endereco: "", senha: "", idPedido: 1, idPerfil: 3 });
-    setModalAberto(true);
+const abrirModalCriar = () => {
+  setEditando(false);
+  setForm({ cpf: "", nome: "", email: "", telefone: "", endereco: "", senha: "", idPedido: 1, idPerfil: 3 });
+  setModalAberto(true);
+};
+
+const abrirModalEditar = (usuario) => {
+  setEditando(true);
+  setUsuarioEditandoId(usuario.idUsuario);
+
+  setForm({
+    cpf: usuario.cpf,
+    nome: usuario.nome,
+    email: usuario.email,
+    telefone: usuario.telefone,
+    endereco: usuario.endereco,
+    senha: usuario.senha,
+    idPedido: usuario.idPedido,
+    idPerfil: usuario.idPerfil
+  });
+
+  setModalAberto(true);
+};
+
+const fecharModal = () => {
+  setModalAberto(false);
+};
+
+const handleChange = (e) => {
+  setForm({ ...form, [e.target.name]: e.target.value });
+};
+
+const salvarUsuario = async (e) => {
+  e.preventDefault();
+
+  const metodo = editando ? "PUT" : "POST";
+  const url = editando ? `${API_URL}/${usuarioEditandoId}` : API_URL;
+
+  const payload = {
+    idUsuario: editando ? usuarioEditandoId : 0,
+    cpf: form.cpf,
+    nome: form.nome,
+    email: form.email,
+    telefone: form.telefone,
+    endereco: form.endereco,
+    senha: form.senha,
+    idPedido: form.idPedido,
+    idPerfil: form.idPerfil
   };
 
-  const abrirModalEditar = (usuario) => {
-    setEditando(true);
-    setUsuarioEditandoId(usuario.idUsuario);
-
-    setForm({
-      cpf: usuario.cpf,
-      nome: usuario.nome,
-      email: usuario.email,
-      telefone: usuario.telefone,
-      endereco: usuario.endereco,
-      senha: usuario.senha,
-      idPedido: usuario.idPedido,
-      idPerfil: usuario.idPerfil
+  try {
+    await fetch(url, {
+      method: metodo,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
-    setModalAberto(true);
-  };
-
-  const fecharModal = () => {
-    setModalAberto(false);
-  };
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const salvarUsuario = async (e) => {
-    e.preventDefault();
-
-    const metodo = editando ? "PUT" : "POST";
-    const url = editando ? `${API_URL}/${usuarioEditandoId}` : API_URL;
-
-    const payload = {
-      idUsuario: editando ? usuarioEditandoId : 0,
-      cpf: form.cpf,
-      nome: form.nome,
-      email: form.email,
-      telefone: form.telefone,
-      endereco: form.endereco,
-      senha: form.senha,
-      idPedido: form.idPedido,
-      idPerfil: form.idPerfil
-    };
-
-    try {
-      await fetch(url, {
-        method: metodo,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      carregarUsuarios();
-      fecharModal();
-    } catch (err) {
-      console.error("Erro ao salvar:", err);
-    }
-  };
-
-  // ❌ EXCLUIR
-  const excluirUsuario = async (id) => {
-    if (!window.confirm("Deseja realmente excluir este usuário?")) return;
-
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
     carregarUsuarios();
-  };
-
-  const perfis = {
-    1: "Admin",
-    2: "Funcionário",
-    3: "Usuário"
+    fecharModal();
+  } catch (err) {
+    console.error("Erro ao salvar:", err);
   }
+};
 
-  return (
+const excluirUsuario = async (id) => {
+  if (!window.confirm("Deseja realmente excluir este usuário?")) return;
+
+  await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+  carregarUsuarios();
+};
+
+const perfis = {
+  1: "Admin",
+  2: "Funcionário",
+  3: "Usuário"
+}
+
+return (
+  <div style={{textAlign: "left", margin: "15px"}}>
+
+    <button type="button" id="btnVoltar" className="btn btn-sm" style={{backgroundColor: "#ccac99"}} onClick={() => navigate(-1)}>Voltar</button>
+
     <div style={{ padding: "30px", textAlign: "center" }}>
-      <h1>Administração</h1>
+      
+      
+
+      <h1>Gerenciamento de Usuários</h1>
 
       <button style={btnCadastrar} onClick={abrirModalCriar}>
         Cadastrar Usuário
@@ -245,99 +253,100 @@ export default function GerenciarUsuarios() {
           </div>
         </div>
       )}
-    </div>
-  );
+    </div> 
+  </div>
+);
 }
 
 
 const table = {
-  width: "80%",
-  margin: "40px auto",
-  borderCollapse: "collapse",
+width: "80%",
+margin: "40px auto",
+borderCollapse: "collapse",
 };
 
 const thtd = {
-  border: "1px solid #ccc",
-  padding: "10px",
-  textAlign: "center",
+border: "1px solid #ccc",
+padding: "10px",
+textAlign: "center",
 };
 
 const btnCadastrar = {
-  padding: "10px 20px",
-  marginTop: "20px",
-  backgroundColor: "#7b4d4d",
-  border: "none",
-  color: "white",
-  borderRadius: "6px",
-  cursor: "pointer",
+padding: "10px 20px",
+marginTop: "20px",
+backgroundColor: "#7b4d4d",
+border: "none",
+color: "white",
+borderRadius: "6px",
+cursor: "pointer",
 };
 
 const btnEditar = {
-  marginRight: "8px",
-  padding: "5px 10px",
-  backgroundColor: "#3578e5",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
+marginRight: "8px",
+padding: "5px 10px",
+backgroundColor: "#3578e5",
+color: "white",
+border: "none",
+borderRadius: "5px",
+cursor: "pointer",
 };
 
 const btnExcluir = {
-  padding: "5px 10px",
-  backgroundColor: "#d9534f",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
+padding: "5px 10px",
+backgroundColor: "#d9534f",
+color: "white",
+border: "none",
+borderRadius: "5px",
+cursor: "pointer",
 };
 
 const inputStyle = {
-  width: "100%",
-  padding: "8px",
-  marginTop: "5px",
-  marginBottom: "15px",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
+width: "100%",
+padding: "8px",
+marginTop: "5px",
+marginBottom: "15px",
+borderRadius: "5px",
+border: "1px solid #ccc",
 };
 
 const modalFundo = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  background: "rgba(0,0,0,0.6)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
+position: "fixed",
+top: 0,
+left: 0,
+width: "100%",
+height: "100%",
+background: "rgba(0,0,0,0.6)",
+display: "flex",
+justifyContent: "center",
+alignItems: "center",
 };
 
 const modalCaixa = {
-  background: "white",
-  width: "400px",
-  padding: "25px",
-  borderRadius: "10px",
-  boxShadow: "0 0 10px rgba(0,0,0,0.4)",
+background: "white",
+width: "400px",
+padding: "25px",
+borderRadius: "10px",
+boxShadow: "0 0 10px rgba(0,0,0,0.4)",
 };
 
 const btnsModalBox = {
-  marginTop: "20px",
-  textAlign: "right",
+marginTop: "20px",
+textAlign: "right",
 };
 
 const btnCancelar = {
-  marginRight: "10px",
-  padding: "6px 12px",
-  cursor: "pointer",
-  backgroundColor: "#d9534f",
-  color: "white"
+marginRight: "10px",
+padding: "6px 12px",
+cursor: "pointer",
+backgroundColor: "#d9534f",
+color: "white"
 };
 
 const btnSalvar = {
-  padding: "6px 12px",
-  backgroundColor: "#7b4d4d",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
+padding: "6px 12px",
+backgroundColor: "#7b4d4d",
+color: "white",
+border: "none",
+borderRadius: "6px",
+cursor: "pointer",
 };

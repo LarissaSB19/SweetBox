@@ -12,8 +12,8 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    [Migration("20251128033959_AjusteCpf")]
-    partial class AjusteCpf
+    [Migration("20260326232423_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,52 @@ namespace SweetBox.Api.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("PedidoItem", b =>
+                {
+                    b.Property<int>("IdPedidoItem")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPedidoItem"));
+
+                    b.Property<int>("IdPedido")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdProduto")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecoUnitario")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("Quantidade")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPedidoItem");
+
+                    b.HasIndex("IdPedido");
+
+                    b.HasIndex("IdProduto");
+
+                    b.ToTable("PedidoItens");
+                });
+
+            modelBuilder.Entity("Perfil", b =>
+                {
+                    b.Property<int>("IdPerfil")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPerfil"));
+
+                    b.Property<string>("NomePerfil")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("IdPerfil");
+
+                    b.ToTable("Perfis");
+                });
+
             modelBuilder.Entity("SweetBox.Api.Models.Categoria", b =>
                 {
                     b.Property<int>("IdCategoria")
@@ -32,9 +78,6 @@ namespace SweetBox.Api.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCategoria"));
-
-                    b.Property<int>("IdProduto")
-                        .HasColumnType("int");
 
                     b.Property<string>("NomeCategoria")
                         .IsRequired()
@@ -115,9 +158,6 @@ namespace SweetBox.Api.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("IdPagamento")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
@@ -135,78 +175,31 @@ namespace SweetBox.Api.Migrations
                     b.ToTable("Pedidos");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.PedidoItem", b =>
+            modelBuilder.Entity("SweetBox.Api.Models.PedidoItemParametroBolo", b =>
                 {
+                    b.Property<int>("IdItemParametro")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdItemParametro"));
+
+                    b.Property<int>("IdParametro")
+                        .HasColumnType("int");
+
                     b.Property<int>("IdPedidoItem")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPedidoItem"));
-
-                    b.Property<int>("IdPedido")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdProduto")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PedidoIdPedido")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("PrecoUnitario")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int?>("ProdutoIdProduto")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdPedidoItem");
-
-                    b.HasIndex("PedidoIdPedido");
-
-                    b.HasIndex("ProdutoIdProduto");
-
-                    b.ToTable("PedidoItens");
-                });
-
-            modelBuilder.Entity("SweetBox.Api.Models.Perfil", b =>
-                {
-                    b.Property<int>("IdPerfil")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPerfil"));
-
-                    b.Property<string>("NomePerfil")
+                    b.Property<string>("ValorEscolhido")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("IdPerfil");
+                    b.HasKey("IdItemParametro");
 
-                    b.ToTable("Perfis");
-                });
+                    b.HasIndex("IdParametro");
 
-            modelBuilder.Entity("SweetBox.Api.Models.Preco", b =>
-                {
-                    b.Property<int>("IdPreco")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasIndex("IdPedidoItem");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPreco"));
-
-                    b.Property<float>("Valor")
-                        .HasColumnType("float");
-
-                    b.Property<DateOnly>("VigenciaFim")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("VigenciaInicio")
-                        .HasColumnType("date");
-
-                    b.HasKey("IdPreco");
-
-                    b.ToTable("Precos");
+                    b.ToTable("PedidoItemParametroBolos");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Produto", b =>
@@ -235,11 +228,47 @@ namespace SweetBox.Api.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<decimal>("Preco")
+                        .HasColumnType("decimal(65,30)");
+
                     b.HasKey("IdProduto");
 
                     b.HasIndex("IdCategoria");
 
                     b.ToTable("Produtos");
+                });
+
+            modelBuilder.Entity("SweetBox.Api.Models.ProdutosParametrosBolo", b =>
+                {
+                    b.Property<int>("IdParametro")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdParametro"));
+
+                    b.Property<string>("DescParametro")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("IdProduto")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Mutiplicador")
+                        .HasColumnType("float");
+
+                    b.Property<string>("NomeParametro")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TipoParametro")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("IdParametro");
+
+                    b.HasIndex("IdProduto");
+
+                    b.ToTable("ProdutosParametrosBolos");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>
@@ -262,7 +291,7 @@ namespace SweetBox.Api.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("IdPedido")
+                    b.Property<int>("IdPerfil")
                         .HasColumnType("int");
 
                     b.Property<string>("Nome")
@@ -280,6 +309,25 @@ namespace SweetBox.Api.Migrations
                     b.HasKey("IdUsuario");
 
                     b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("PedidoItem", b =>
+                {
+                    b.HasOne("SweetBox.Api.Models.Pedido", "Pedido")
+                        .WithMany()
+                        .HasForeignKey("IdPedido")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SweetBox.Api.Models.Produto", "Produto")
+                        .WithMany()
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pedido");
+
+                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Estoque", b =>
@@ -315,19 +363,25 @@ namespace SweetBox.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.PedidoItem", b =>
+            modelBuilder.Entity("SweetBox.Api.Models.PedidoItemParametroBolo", b =>
                 {
-                    b.HasOne("SweetBox.Api.Models.Pedido", "Pedido")
+                    b.HasOne("SweetBox.Api.Models.ProdutosParametrosBolo", "Parametro")
                         .WithMany()
-                        .HasForeignKey("PedidoIdPedido");
+                        .HasForeignKey("IdParametro")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PedidoItemParametroBolo_ProdutosParametrosBolo");
 
-                    b.HasOne("SweetBox.Api.Models.Produto", "Produto")
-                        .WithMany()
-                        .HasForeignKey("ProdutoIdProduto");
+                    b.HasOne("PedidoItem", "PedidoItem")
+                        .WithMany("PedidoItemParametroBolo")
+                        .HasForeignKey("IdPedidoItem")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PedidoItemParametroBolo_PedidoItem");
 
-                    b.Navigation("Pedido");
+                    b.Navigation("Parametro");
 
-                    b.Navigation("Produto");
+                    b.Navigation("PedidoItem");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Produto", b =>
@@ -336,9 +390,26 @@ namespace SweetBox.Api.Migrations
                         .WithMany("Produtos")
                         .HasForeignKey("IdCategoria")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Produto_Categoria");
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("SweetBox.Api.Models.ProdutosParametrosBolo", b =>
+                {
+                    b.HasOne("SweetBox.Api.Models.Produto", "Produto")
+                        .WithMany("ProdutosParametrosBolo")
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("PedidoItem", b =>
+                {
+                    b.Navigation("PedidoItemParametroBolo");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Categoria", b =>
@@ -354,6 +425,8 @@ namespace SweetBox.Api.Migrations
             modelBuilder.Entity("SweetBox.Api.Models.Produto", b =>
                 {
                     b.Navigation("Estoque");
+
+                    b.Navigation("ProdutosParametrosBolo");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>

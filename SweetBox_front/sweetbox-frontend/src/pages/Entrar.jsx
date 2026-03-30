@@ -37,8 +37,8 @@ function Entrar() {
 
 			const dados = await response.json();
 
-			localStorage.setItem("usuario", dados.idUsuario);
-      localStorage.setItem("perfil", dados.idPerfil);
+			sessionStorage.setItem("usuario", dados.idUsuario);
+      sessionStorage.setItem("perfil", dados.idPerfil);
       
 			navigate("/");
 		}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SweetBox.Data;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,7 @@ builder.Services.AddDbContext<SweetBoxContext>(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler =
-            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
 builder.Services.AddCors(options =>
@@ -36,7 +36,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler("/error");
+
 app.UseCors("AllowAll");
+
+app.UseAuthorization();
 
 app.MapControllers();
 

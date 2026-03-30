@@ -4,6 +4,18 @@ import { useState, useEffect } from "react";
 export default function Admin() {
 	const navigate = useNavigate();
 	const [perfil, setPerfil] = useState(null);
+	const [menuAberto, setMenuAberto] = useState(false);
+
+	const toggleMenu = () => setMenuAberto(!menuAberto);
+
+	const irParaPerfil = () => navigate("/perfil");
+	const irParaAdmin = () => navigate("/admin");
+
+	function irParaSair() {
+	sessionStorage.removeItem("usuario");
+	sessionStorage.removeItem("perfil");
+	navigate("/entrar");
+	}
 
 	useEffect(() => {
 		const dadosSalvos = localStorage.getItem("perfil");
@@ -19,68 +31,117 @@ export default function Admin() {
 	}, [perfil, navigate]);
 
 	return (
-		<div 
-		style={{
-			backgroundColor: "#f7eee7",
-			minHeight: "100vh",
-			display: "flex",
-			flexDirection: "column",
-			alignItems: "center",
-			justifyContent: "center",
-			padding: "20px"
-		}}
-		>
 
-		<h1 style={{ 
-			color: "#4B2E2E", 
-			marginBottom: "40px", 
-			fontWeight: "bold" 
-		}}>
-			Administração
-		</h1>
+		<div style={{ padding: "30px" }}>
 
-		<div
+			<div style={{ position: "absolute", top: "20px", left: "20px" }}>
+			<div style={{ position: "relative" }}>
+
+				<button 
+				className="btn btn-sm botao"
+				onClick={() => setMenuAberto(!menuAberto)}
+				style={{ fontSize: "20px" }}
+				>
+				☰
+				</button>
+
+				{menuAberto && (
+				<div style={{
+					position: "absolute",
+					left: 0,
+					top: "45px",
+					background: "white",
+					borderRadius: "10px",
+					boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+					padding: "10px",
+					zIndex: 1000,
+					minWidth: "180px"
+				}}>
+
+					<button 
+					className="dropdown-item"
+					onClick={() => navigate("/")}
+					style={{ padding: "10px", width: "100%", textAlign: "left" }}
+					>
+					🏠 Página Inicial
+					</button>
+
+					<button 
+					className="dropdown-item"
+					onClick={() => navigate("/perfil")}
+					style={{ padding: "10px", width: "100%", textAlign: "left" }}
+					>
+					👤 Perfil
+					</button>
+
+					<hr />
+
+					<button 
+					className="dropdown-item text-danger"
+					onClick={() => {
+						sessionStorage.removeItem("usuario");
+						sessionStorage.removeItem("perfil");
+						navigate("/entrar");
+					}}
+					style={{ padding: "10px", width: "100%", textAlign: "left" }}
+					>
+					Sair
+					</button>
+
+				</div>
+				)}
+			</div>
+			</div>		
+
+			<div 
 			style={{
-			backgroundColor: "#fff",
-			padding: "40px",
-			borderRadius: "18px",
-			border: "2px solid #a87f67",
-			boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-			width: "100%",
-			maxWidth: "420px",
-			textAlign: "center"
+				backgroundColor: "#f7eee7",
+				minHeight: "80vh",
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				padding: "20px"
 			}}
-		>
-
-			<button 
-			onClick={() => navigate("/gerenciarUsuarios")}
-			style={botao}
 			>
-			Gerenciar Usuários
-			</button>
 
-			<button 
-			onClick={() => navigate("/gerenciarProdutos")}
-			style={botao}
+			<h1 style={{ 
+				color: "#4B2E2E", 
+				marginBottom: "40px", 
+				fontWeight: "bold" 
+			}}>
+				Administração
+			</h1>
+
+			<div
+				style={{
+				backgroundColor: "#fff",
+				padding: "40px",
+				borderRadius: "18px",
+				border: "2px solid #a87f67",
+				boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+				width: "100%",
+				maxWidth: "420px",
+				textAlign: "center"
+				}}
 			>
-			Gerenciar Produtos
-			</button>
 
-			{/*<button 
-			onClick={() => navigate("/pedidos")}
-			style={botao}
-			>
-			Gerenciar Pedidos
-			</button>
+				<button 
+				onClick={() => navigate("/gerenciarUsuarios")}
+				style={botao}
+				>
+				Gerenciar Usuários
+				</button>
 
-			<button 
-			onClick={() => navigate("/relatorios")}
-			style={botao}
-			>
-			Relatórios
-			</button>*/}
-
-		</div>
+				<button 
+				onClick={() => navigate("/gerenciarProdutos")}
+				style={botao}
+				>
+				Gerenciar Produtos
+				</button>
+				
+			</div>
+			</div>
 		</div>
 	);
 }

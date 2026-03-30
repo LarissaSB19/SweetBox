@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SweetBox.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,28 +46,13 @@ namespace SweetBox.Api.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Precos",
-                columns: table => new
-                {
-                    IdPreco = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Valor = table.Column<float>(type: "float", nullable: false),
-                    VigenciaInicio = table.Column<DateOnly>(type: "date", nullable: false),
-                    VigenciaFim = table.Column<DateOnly>(type: "date", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Precos", x => x.IdPreco);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "Usuarios",
                 columns: table => new
                 {
                     IdUsuario = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    CPF = table.Column<int>(type: "int", nullable: false),
+                    CPF = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Nome = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "longtext", nullable: false)
@@ -76,9 +61,9 @@ namespace SweetBox.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Endereco = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SenhaHash = table.Column<string>(type: "longtext", nullable: false)
+                    Senha = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IdPedido = table.Column<int>(type: "int", nullable: false)
+                    IdPerfil = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,14 +83,15 @@ namespace SweetBox.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Imagem = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IdCategoria = table.Column<int>(type: "int", nullable: false),
-                    IdEstoque = table.Column<int>(type: "int", nullable: false)
+                    IdEstoque = table.Column<int>(type: "int", nullable: false),
+                    Preco = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    IdCategoria = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Produtos", x => x.IdProduto);
                     table.ForeignKey(
-                        name: "FK_Produtos_Categorias_IdCategoria",
+                        name: "FK_Produto_Categoria",
                         column: x => x.IdCategoria,
                         principalTable: "Categorias",
                         principalColumn: "IdCategoria",
@@ -125,8 +111,7 @@ namespace SweetBox.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     FormaPagamento = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IdUsuario = table.Column<int>(type: "int", nullable: false),
-                    IdPagamento = table.Column<int>(type: "int", nullable: false)
+                    IdUsuario = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -154,6 +139,33 @@ namespace SweetBox.Api.Migrations
                     table.PrimaryKey("PK_Estoques", x => x.IdEstoque);
                     table.ForeignKey(
                         name: "FK_Estoques_Produtos_IdProduto",
+                        column: x => x.IdProduto,
+                        principalTable: "Produtos",
+                        principalColumn: "IdProduto",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProdutosParametrosBolos",
+                columns: table => new
+                {
+                    IdParametro = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TipoParametro = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NomeParametro = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DescParametro = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Mutiplicador = table.Column<float>(type: "float", nullable: false),
+                    IdProduto = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProdutosParametrosBolos", x => x.IdParametro);
+                    table.ForeignKey(
+                        name: "FK_ProdutosParametrosBolos_Produtos_IdProduto",
                         column: x => x.IdProduto,
                         principalTable: "Produtos",
                         principalColumn: "IdProduto",
@@ -196,23 +208,52 @@ namespace SweetBox.Api.Migrations
                     Quantidade = table.Column<int>(type: "int", nullable: false),
                     PrecoUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     IdPedido = table.Column<int>(type: "int", nullable: false),
-                    PedidoIdPedido = table.Column<int>(type: "int", nullable: true),
-                    IdProduto = table.Column<int>(type: "int", nullable: false),
-                    ProdutoIdProduto = table.Column<int>(type: "int", nullable: true)
+                    IdProduto = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PedidoItens", x => x.IdPedidoItem);
                     table.ForeignKey(
-                        name: "FK_PedidoItens_Pedidos_PedidoIdPedido",
-                        column: x => x.PedidoIdPedido,
+                        name: "FK_PedidoItens_Pedidos_IdPedido",
+                        column: x => x.IdPedido,
                         principalTable: "Pedidos",
-                        principalColumn: "IdPedido");
+                        principalColumn: "IdPedido",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PedidoItens_Produtos_ProdutoIdProduto",
-                        column: x => x.ProdutoIdProduto,
+                        name: "FK_PedidoItens_Produtos_IdProduto",
+                        column: x => x.IdProduto,
                         principalTable: "Produtos",
-                        principalColumn: "IdProduto");
+                        principalColumn: "IdProduto",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "PedidoItemParametroBolos",
+                columns: table => new
+                {
+                    IdItemParametro = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    IdPedidoItem = table.Column<int>(type: "int", nullable: false),
+                    IdParametro = table.Column<int>(type: "int", nullable: false),
+                    ValorEscolhido = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PedidoItemParametroBolos", x => x.IdItemParametro);
+                    table.ForeignKey(
+                        name: "FK_PedidoItemParametroBolo_PedidoItem",
+                        column: x => x.IdPedidoItem,
+                        principalTable: "PedidoItens",
+                        principalColumn: "IdPedidoItem",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PedidoItemParametroBolo_ProdutosParametrosBolo",
+                        column: x => x.IdParametro,
+                        principalTable: "ProdutosParametrosBolos",
+                        principalColumn: "IdParametro",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -229,14 +270,24 @@ namespace SweetBox.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PedidoItens_PedidoIdPedido",
-                table: "PedidoItens",
-                column: "PedidoIdPedido");
+                name: "IX_PedidoItemParametroBolos_IdParametro",
+                table: "PedidoItemParametroBolos",
+                column: "IdParametro");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PedidoItens_ProdutoIdProduto",
+                name: "IX_PedidoItemParametroBolos_IdPedidoItem",
+                table: "PedidoItemParametroBolos",
+                column: "IdPedidoItem");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PedidoItens_IdPedido",
                 table: "PedidoItens",
-                column: "ProdutoIdProduto");
+                column: "IdPedido");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PedidoItens_IdProduto",
+                table: "PedidoItens",
+                column: "IdProduto");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pedidos_IdUsuario",
@@ -246,8 +297,12 @@ namespace SweetBox.Api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Produtos_IdCategoria",
                 table: "Produtos",
-                column: "IdCategoria",
-                unique: false);
+                column: "IdCategoria");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProdutosParametrosBolos_IdProduto",
+                table: "ProdutosParametrosBolos",
+                column: "IdProduto");
         }
 
         /// <inheritdoc />
@@ -260,13 +315,16 @@ namespace SweetBox.Api.Migrations
                 name: "Pagamentos");
 
             migrationBuilder.DropTable(
-                name: "PedidoItens");
+                name: "PedidoItemParametroBolos");
 
             migrationBuilder.DropTable(
                 name: "Perfis");
 
             migrationBuilder.DropTable(
-                name: "Precos");
+                name: "PedidoItens");
+
+            migrationBuilder.DropTable(
+                name: "ProdutosParametrosBolos");
 
             migrationBuilder.DropTable(
                 name: "Pedidos");

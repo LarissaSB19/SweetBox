@@ -8,11 +8,14 @@ export default function Home() {
 	const [perfil, setPerfil] = useState(null);
 
 	const irParaPedido = () => {
-		navigate("/pedido")
-	}
-	const irParaCardapio = () => {
-		navigate("/cardapio")
-	}
+		if (!usuario) {
+			navigate("/entrar");
+			return;
+		}
+
+		navigate("/pedido");
+	};
+	
 	const irParaEntrar = () => {
 		navigate("/entrar")
 	}
@@ -20,9 +23,19 @@ export default function Home() {
 		navigate("/admin")
 	}
 
+	const irParaPerfil = () => {
+		navigate("/perfil");
+	}	
+
+	const [menuAberto, setMenuAberto] = useState(false);
+
+	const toggleMenu = () => {
+		setMenuAberto(!menuAberto);
+	};
+
 	function irParaSair() {
 		setUsuario(null);
-		localStorage.removeItem("usuario");
+		sessionStorage.removeItem("usuario");
 	}
 
 	if (!usuario) {
@@ -30,14 +43,14 @@ export default function Home() {
 	}
 
 	useEffect(() => {
-		const dadosSalvos = localStorage.getItem("usuario");
+		const dadosSalvos = sessionStorage.getItem("usuario");
 		if (dadosSalvos) {
 			setUsuario(JSON.parse(dadosSalvos));
 		}
 	}, []);
 
 	useEffect(() => {
-		const dadosSalvos = localStorage.getItem("perfil");
+		const dadosSalvos = sessionStorage.getItem("perfil");
 		if (dadosSalvos) {
 			setPerfil(JSON.parse(dadosSalvos));
 		}
@@ -46,17 +59,79 @@ export default function Home() {
 
 	return (
 		<div>
-			<div className="float-left">
+			<div style={{ position: "absolute", top: "20px", left: "20px" }}>
 				{usuario ? (
-					<div>
-						<button id="btnLogout" className="btn btn-sm botao" onClick={irParaSair}>Sair</button>
-						{perfil < 3 ? (
-							<button id="btnAdmin" className="btn btn-sm botao" onClick={irParaAdmin}>Administração</button>
-						) : null}
-							
+					<div style={{ position: "relative" }}>
+
+						<button 
+							className="btn btn-sm botao"
+							onClick={toggleMenu}
+							style={{ fontSize: "20px" }}
+						>
+							☰
+						</button>
+
+						{menuAberto && (
+							<div 
+								style={{
+									position: "absolute",
+									left: 0,
+									top: "45px",
+									background: "white",
+									borderRadius: "10px",
+									boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+									padding: "10px",
+									zIndex: 1000,
+									minWidth: "180px"
+								}}
+							>
+								<button 
+									className="dropdown-item"
+									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+									onClick={() => {
+										setMenuAberto(false);
+										irParaPerfil();
+									}}
+								>
+									👤 Perfil
+								</button>
+
+								{perfil < 3 && (
+									<button 
+										className="dropdown-item"
+										style={{ padding: "10px", width: "100%", textAlign: "left" }}
+										onClick={() => {
+											setMenuAberto(false);
+											irParaAdmin();
+										}}
+									>
+										⚙️ Administração
+									</button>
+								)}
+
+								<hr style={{ margin: "8px 0" }} />
+
+								<button 
+									className="dropdown-item text-danger"
+									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+									onClick={() => {
+										setMenuAberto(false);
+										irParaSair();
+									}}
+								>
+									Sair
+								</button>
+							</div>
+						)}
 					</div>
 				) : (
-					<button id="btnLogin" className="btn btn-sm" onClick={irParaEntrar}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16" style={{marginTop: "-3px"}}><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>&nbsp;&nbsp;Entrar</button>
+					<button
+						id="btnLogin" 
+						className="btn btn-sm botao" 
+						onClick={irParaEntrar}
+					>
+						👤 Entrar
+					</button>
 				)}
 			</div>
 			<div className="row">
@@ -68,7 +143,6 @@ export default function Home() {
 					</div>
 
 					<div className="botoes row">
-						<div className="col-lg-6"><button onClick={irParaCardapio} className="botao-inicio">Cardápio</button></div>
 						<div className="col-lg-6"><button onClick={irParaPedido} className="botao-inicio">Faça seu Pedido</button></div>
 					</div>
 				</div>

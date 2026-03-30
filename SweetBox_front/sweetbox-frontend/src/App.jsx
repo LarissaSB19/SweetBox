@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
-import Cardapio from './pages/Cardapio';
 import Pedido from './pages/Pedido';
 import Entrar from "./pages/Entrar";
 import Cadastrar from "./pages/Cadastrar";
@@ -8,6 +7,7 @@ import RecuperarSenha from "./pages/RecuperarSenha";
 import Admin from "./pages/Admin";
 import GerenciarProdutos from "./pages/GerenciarProdutos";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
+import Perfil from './pages/Perfil';
 
 function App() {
 
@@ -15,7 +15,6 @@ function App() {
 		<BrowserRouter>
 		<Routes>
 			<Route path="/" element={<Home />} />
-			<Route path="/cardapio" element={<Cardapio />} />
 			<Route path="/pedido" element={<Pedido />} />
 			<Route path="/entrar" element={<Entrar />} />
 			<Route path="/cadastrar" element={<Cadastrar />} />
@@ -23,6 +22,7 @@ function App() {
 			<Route path="/admin" element={<Admin/>} />
 			<Route path="/gerenciarProdutos" element={<GerenciarProdutos/>} />
 			<Route path="/gerenciarUsuarios" element={<GerenciarUsuarios/>} />
+			<Route path="/perfil" element={<Perfil />} />
 		</Routes>
 		</BrowserRouter>
 	);

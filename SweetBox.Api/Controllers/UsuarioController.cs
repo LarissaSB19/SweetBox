@@ -29,6 +29,45 @@ public class UsuarioController : ControllerBase
         return Ok(usuario);
     }
 
+    [HttpGet("perfil/{id}")]
+    public async Task<IActionResult> GetPerfil(int id)
+    {
+        var usuario = await _context.Usuarios
+            .Where(u => u.IdUsuario == id)
+            .Select(u => new {
+                u.IdUsuario,
+                u.Nome,
+                u.Email,
+                u.Telefone,
+                u.Endereco,
+                u.CPF,
+                u.Senha,
+                u.IdPerfil
+            })
+            .FirstOrDefaultAsync();
+
+        if (usuario == null)
+            return NotFound();
+
+        var pedidos = await _context.Pedidos
+            .Where(p => p.IdUsuario == id)
+            .Select(p => new {
+                p.IdPedido,
+                p.DataPedido,
+                p.ValorTotal,
+                p.StatusPedido,
+                p.FormaPagamento
+            })
+            .OrderByDescending(p => p.DataPedido)
+            .ToListAsync();
+
+        return Ok(new
+        {
+            usuario,
+            pedidos
+        });
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuariosAsync()
     {
@@ -36,12 +75,13 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Usuario>> GetUsuarioAsync(int idUsuario)
+    public async Task<ActionResult<Usuario>> GetUsuarioAsync(int id)
     {
-        var usuario = await _context.Usuarios.FindAsync(idUsuario);
+        var usuario = await _context.Usuarios.FindAsync(id);
         if (usuario == null) return NotFound();
         return Ok(usuario);
     }
+
     [HttpPost]
 
     public async Task<ActionResult<Usuario>> CreateUsuarioAsync([FromBody] Usuario usuario)

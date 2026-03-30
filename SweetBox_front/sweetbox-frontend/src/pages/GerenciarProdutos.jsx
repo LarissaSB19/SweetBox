@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5179/api/Produto";
 
@@ -7,11 +8,13 @@ export default function GerenciarProdutos() {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(false);
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     nomeProduto: "",
     preco: "",
     descricao: "",
+    imagem: "",
     idCategoria: 1,
     idEstoque: 1
   });
@@ -32,7 +35,7 @@ export default function GerenciarProdutos() {
 
   const abrirModalCriar = () => {
     setEditando(false);
-    setForm({ nomeProduto: "", preco: "", descricao: "", idCategoria: 1, idEstoque: 1 });
+    setForm({ nomeProduto: "", preco: "", descricao: "", imagem: "", idCategoria: 1, idEstoque: 1 });
     setModalAberto(true);
   };
 
@@ -41,21 +44,24 @@ export default function GerenciarProdutos() {
     setProdutoEditandoId(produto.idProduto);
 
     setForm({
-      nomeProduto: produto.nomeProduto,
-      preco: produto.preco ?? "",
-      descricao: produto.descricao,
-      idCategoria: produto.idCategoria,
-      idEstoque: produto.idEstoque
+      nomeProduto: produto.nomeProduto || "",
+      preco: produto.preco || "",
+      descricao: produto.descricao || "",
+      imagem: produto.imagem || "",
+      idCategoria: produto.idCategoria || 1,
+      idEstoque: produto.idEstoque || 1
     });
 
     setModalAberto(true);
   };
+  
 
   const fecharModal = () => {
     setModalAberto(false);
   };
-
+  
   const handleChange = (e) => {
+    console.log(e.target.name, e.target.value);
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -70,6 +76,7 @@ export default function GerenciarProdutos() {
       nomeProduto: form.nomeProduto,
       idEstoque: form.idEstoque,
       descricao: form.descricao,
+      imagem: form.imagem,
       idCategoria: form.idCategoria,
       preco: parseFloat(form.preco)
     };
@@ -88,7 +95,6 @@ export default function GerenciarProdutos() {
     }
   };
 
-  // ❌ EXCLUIR
   const excluirProduto = async (id) => {
     if (!window.confirm("Deseja realmente excluir este produto?")) return;
 
@@ -96,101 +102,169 @@ export default function GerenciarProdutos() {
     carregarProdutos();
   };
 
+  
+
   return (
-    <div style={{ padding: "30px", textAlign: "center" }}>
-      <h1>Administração</h1>
+    <div style={{textAlign: "left", margin: "15px"}}> 
+      <button type="button" id="btnVoltar" className="btn btn-sm" style={{backgroundColor: "#ccac99"}} onClick={() => navigate(-1)}>Voltar</button>
 
-      <button style={btnCadastrar} onClick={abrirModalCriar}>
-        Cadastrar Produto
-      </button>
+      <div style={{ padding: "30px", textAlign: "center" }}>
+ 
+        <h1>Gerenciamento dos Produtos</h1>
 
-      <table style={table}>
-        <thead>
-          <tr style={{ backgroundColor: "#eee" }}>
-            <th style={thtd}>ID</th>
-            <th style={thtd}>Nome</th>
-            <th style={thtd}>Preço</th>
-            <th style={thtd}>Descrição</th>
-            <th style={thtd}>Ações</th>
-          </tr>
-        </thead>
+        <button style={btnCadastrar} onClick={abrirModalCriar}>
+          Cadastrar Produto
+        </button>
 
-        <tbody>
-          {produtos.length === 0 ? (
-            <tr>
-              <td colSpan="5" style={{ padding: "20px" }}>
-                Nenhum produto cadastrado.
-              </td>
+        <table style={table}>
+          <thead>
+            <tr style={{ backgroundColor: "#eee" }}>
+              <th style={thtd}>ID</th>
+              <th style={thtd}>Nome</th>
+              <th style={thtd}>Preço</th>
+              <th style={thtd}>Descrição</th>
+              <th style={thtd}>Imagem</th>
+              <th style={thtd}>Categoria</th>
+              <th style={thtd}>Ações</th>
             </tr>
-          ) : (
-            produtos.map((p) => (
-              <tr key={p.idProduto}>
-                <td style={thtd}>{p.idProduto}</td>
-                <td style={thtd}>{p.nomeProduto}</td>
-                <td style={thtd}>R$ {p.preco}</td>
-                <td style={thtd}>{p.descricao}</td>
-                <td style={thtd}>
-                  <button style={btnEditar} onClick={() => abrirModalEditar(p)}>
-                    Editar
-                  </button>
+          </thead>
 
-                  <button style={btnExcluir} onClick={() => excluirProduto(p.idProduto)}>
-                    Excluir
-                  </button>
+          <tbody>
+            {produtos.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ padding: "20px" }}>
+                  Nenhum produto cadastrado.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              produtos.map((p) => (
+                <tr key={p.idProduto}>
+                  <td style={thtd}>{p.idProduto}</td>
+                  <td style={thtd}>{p.nomeProduto}</td>
+                  <td style={thtd}>R$ {p.preco}</td>
+                  <td style={thtd}>{p.descricao}</td>
+                  <td style={thtd}>
+                    <img
+                      src={p.imagem}
+                      alt={p.nomeProduto}
+                      style={{ width: "80px", height: "80px", objectFit: "cover" }}
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/80";
+                      }}
+                    /> 
+ 
+                  </td>
+                  <td style={thtd}>
+                    {p.categoria?.nomeCategoria || "—"}
+                  </td>
+                  <td style={thtd}>
+                    <button style={btnEditar} onClick={() => abrirModalEditar(p)}>
+                      Editar
+                    </button>
+                    
 
-      {modalAberto && (
-        <div style={modalFundo}>
-          <div style={modalCaixa}>
-            <h2>{editando ? "Editar Produto" : "Cadastrar Produto"}</h2>
+                    <button style={btnExcluir} onClick={() => excluirProduto(p.idProduto)}>
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
-            <form onSubmit={salvarProduto} style={{ textAlign: "left" }}>
-              <label>Nome:</label>
-              <input
-                type="text"
-                name="nomeProduto"
-                value={form.nomeProduto}
-                onChange={handleChange}
-                style={inputStyle}
-                required
-              />
+        {modalAberto && (
+          <div style={modalFundo}>
+            <div style={modalCaixa}>
+              <h2>{editando ? "Editar Produto" : "Cadastrar Produto"}</h2>
 
-              <label>Preço:</label>
-              <input
-                type="number"
-                name="preco"
-                value={form.preco}
-                onChange={handleChange}
-                style={inputStyle}
-                required
-              />
+              <form onSubmit={salvarProduto} style={{ textAlign: "left" }}>
+                <label>Nome:</label>
+                <input
+                  type="text"
+                  name="nomeProduto"
+                  value={form.nomeProduto}
+                  onChange={handleChange}
+                  style={inputStyle}
+                  required
+                />
 
-              <label>Descrição:</label>
-              <textarea
-                name="descricao"
-                value={form.descricao}
-                onChange={handleChange}
-                style={{ ...inputStyle, height: "80px" }}
-              />
+                <label>Preço:</label>
+                <input
+                  type="text"
+                  name="preco"
+                  value={form.preco}
+                  onChange={handleChange}
+                  style={inputStyle}
+                  required
+                />
 
-              <div style={btnsModalBox}>
-                <button type="button" onClick={fecharModal} style={btnCancelar}>
-                  Cancelar
-                </button>
+                <label>Descrição:</label>
+                <textarea
+                  name="descricao"
+                  value={form.descricao}
+                  onChange={handleChange}
+                  style={{ ...inputStyle, height: "80px" }}
+                />
 
-                <button type="submit" style={btnSalvar}>
-                  {editando ? "Atualizar" : "Salvar"}
-                </button>
-              </div>
-            </form>
+                <label>Imagem:</label>
+                <input
+                  type="text"
+                  name="imagem"
+                  value={form.imagem}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+                {form.imagem && (
+                  <img
+                    key={form.imagem}
+                    src={
+                      form.imagem.startsWith("http")
+                        ? form.imagem
+                        : `http://localhost:5179/${form.imagem}`
+                    }
+                    alt="Preview"
+                    style={{
+                      width: "120px",
+                      height: "120px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      marginTop: "10px"
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                )}
+
+                <select
+                  name="idCategoria"
+                  value={form.idCategoria}
+                  onChange={handleChange}
+                  style={inputStyle}
+                >
+                  <option value="">Selecione</option>
+                  <option value={1}>Bolos</option>
+                  <option value={2}>Doces</option>
+                  <option value={3}>Bombons</option>
+                  <option value={4}>Outros</option>
+
+                </select>
+                
+                <div style={btnsModalBox}>
+                  <button type="button" onClick={fecharModal} style={btnCancelar}>
+                    Cancelar
+                  </button>
+
+                  <button type="submit" style={btnSalvar}>
+                    {editando ? "Atualizar" : "Salvar"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -14,10 +14,14 @@ public class ProdutoController : ControllerBase
         _context = context;
     }
 
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Produto>>> GetProdutosAsync()
+    public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
     {
-        return Ok(await _context.Produtos.ToListAsync());
+        return await _context.Produtos
+            .Include(p => p.Categoria)
+            .Include(p => p.ProdutosParametrosBolo)
+            .ToListAsync();
     }
 
     [HttpGet("{idProduto}", Name = "GetProduto")]
@@ -28,12 +32,13 @@ public class ProdutoController : ControllerBase
         return Ok(produto);
     }
 
+
     [HttpPost]
     public async Task<ActionResult<Produto>> CreateProdutoAsync(Produto produto)
     {
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
-        //return CreatedAtAction(nameof(GetProdutoAsync), new { idProduto = produto.IdProduto }, produto);
+
         return Created($"/api/Produto/{produto.IdProduto}", produto);
     }
 
@@ -55,4 +60,5 @@ public class ProdutoController : ControllerBase
         await _context.SaveChangesAsync();
         return NoContent();
     }
+
 }
