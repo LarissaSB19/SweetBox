@@ -51,12 +51,20 @@ public class UsuarioController : ControllerBase
 
         var pedidos = await _context.Pedidos
             .Where(p => p.IdUsuario == id)
+            .Include(p => p.PedidoItens)
+                .ThenInclude(pi => pi.Produto)
             .Select(p => new {
                 p.IdPedido,
                 p.DataPedido,
                 p.ValorTotal,
                 p.StatusPedido,
-                p.FormaPagamento
+                p.FormaPagamento,
+
+                itens = p.PedidoItens.Select(i => new {
+                    nomeProduto = i.Produto.NomeProduto,
+                    quantidade = i.Quantidade,
+                    preco = i.PrecoUnitario
+                })
             })
             .OrderByDescending(p => p.DataPedido)
             .ToListAsync();

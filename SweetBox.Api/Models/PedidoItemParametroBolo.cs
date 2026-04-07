@@ -14,5 +14,7 @@ namespace SweetBox.Api.Models
         public ProdutosParametrosBolo? Parametro { get; set; }
 
         public string ValorEscolhido { get; set; } = string.Empty;
+
+        public int Quantidade { get; set; } 
     }
 }

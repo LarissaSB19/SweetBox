@@ -18,7 +18,13 @@ public class PedidoController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidosAsync()
     {
-        return Ok(await _context.Pedidos.ToListAsync());
+        return Ok(await _context.Pedidos
+            .Include(p => p.Usuario)
+            .Include(p => p.PedidoItens)
+                .ThenInclude(i => i.Produto)
+            .Include(p => p.PedidoItens)
+                .ThenInclude(i => i.PedidoItemParametroBolo)
+            .ToListAsync());
     }
 
     [HttpGet("{idPedido}")]
@@ -27,6 +33,7 @@ public class PedidoController : ControllerBase
         var pedido = await _context.Pedidos.FindAsync(idPedido);
         if (pedido == null) return NotFound();
         return Ok(pedido);
+
     }
 
     [HttpPost]
@@ -68,7 +75,8 @@ public class PedidoController : ControllerBase
                         {
                             PedidoItem = item,
                             IdParametro = param.IdParametro,
-                            ValorEscolhido = param.ValorEscolhido
+                            ValorEscolhido = param.ValorEscolhido,
+                            Quantidade = param.Quantidade
                         };
 
                         _context.PedidoItemParametroBolos.Add(itemParametro);
@@ -84,16 +92,22 @@ public class PedidoController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Erro ao criar pedido: {ex.Message}");
+            return StatusCode(500, $"Erro: {ex.InnerException?.Message ?? ex.Message}");
         }
     }
 
-    [HttpPut("{idPedido}")]
-    public async Task<IActionResult> UpdatePedidoAsync(int idPedido, Pedido pedido)
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> AtualizarStatus(int id, AtualizarStatusDTO dto)
     {
-        if (idPedido != pedido.IdPedido) return BadRequest();
-        _context.Entry(pedido).State = EntityState.Modified;
+        var pedido = await _context.Pedidos.FindAsync(id);
+
+        if (pedido == null)
+            return NotFound();
+
+        pedido.StatusPedido = dto.StatusPedido;
+
         await _context.SaveChangesAsync();
+
         return NoContent();
     }
 

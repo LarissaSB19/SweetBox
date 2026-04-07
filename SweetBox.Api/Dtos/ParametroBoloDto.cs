@@ -4,5 +4,6 @@
     {
         public int IdParametro { get; set; }
         public string ValorEscolhido { get; set; } = string.Empty;
+        public int Quantidade { get; set; }
     }
 }

@@ -10,6 +10,7 @@ export default function Admin() {
 
 	const irParaPerfil = () => navigate("/perfil");
 	const irParaAdmin = () => navigate("/admin");
+	const irParaMeusPedidos = () => navigate("/meusPedidos");
 
 	function irParaSair() {
 	sessionStorage.removeItem("usuario");
@@ -59,21 +60,34 @@ export default function Admin() {
 				}}>
 
 					<button 
-					className="dropdown-item"
-					onClick={() => navigate("/")}
-					style={{ padding: "10px", width: "100%", textAlign: "left" }}
-					>
+						className="dropdown-item"
+						style={{ padding: "10px", width: "100%", textAlign: "left" }}
+						onClick={() => {
+						setMenuAberto(false);
+						irParaHome(); }}>
+
 					🏠 Página Inicial
 					</button>
 
 					<button 
-					className="dropdown-item"
-					onClick={() => navigate("/perfil")}
-					style={{ padding: "10px", width: "100%", textAlign: "left" }}
-					>
+						className="dropdown-item"
+						style={{ padding: "10px", width: "100%", textAlign: "left" }}
+						onClick={() => {
+						setMenuAberto(false);
+						irParaPerfil(); }}>
+
 					👤 Perfil
 					</button>
+					
+					<button
+						className="dropdown-item"
+						style={{ padding: "10px", width: "100%", textAlign: "left" }}
+						onClick={() => {
+						setMenuAberto(false);
+						irParaMeusPedidos(); }}>
 
+						📦 Meus Pedidos
+					</button>
 					<hr />
 
 					<button 
@@ -130,14 +144,21 @@ export default function Admin() {
 				onClick={() => navigate("/gerenciarUsuarios")}
 				style={botao}
 				>
-				Gerenciar Usuários
+					Gerenciar Usuários
 				</button>
 
 				<button 
 				onClick={() => navigate("/gerenciarProdutos")}
 				style={botao}
 				>
-				Gerenciar Produtos
+					Gerenciar Produtos
+				</button>
+
+				<button 
+				onClick={() => navigate("/gerenciarPedidos")}
+				style={botao}
+				>
+					Gerenciar Pedidos
 				</button>
 				
 			</div>

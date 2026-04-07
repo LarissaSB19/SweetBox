@@ -27,6 +27,10 @@ export default function Home() {
 		navigate("/perfil");
 	}	
 
+	const irParaMeusPedidos = () => {
+		navigate("/meusPedidos");
+	}	
+
 	const [menuAberto, setMenuAberto] = useState(false);
 
 	const toggleMenu = () => {
@@ -94,6 +98,16 @@ export default function Home() {
 									}}
 								>
 									👤 Perfil
+								</button>
+
+								<button
+									className="dropdown-item"
+									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+									onClick={() => {
+									setMenuAberto(false);
+									irParaMeusPedidos(); }}>
+
+									📦 Meus Pedidos
 								</button>
 
 								{perfil < 3 && (

@@ -8,6 +8,8 @@ import Admin from "./pages/Admin";
 import GerenciarProdutos from "./pages/GerenciarProdutos";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import Perfil from './pages/Perfil';
+import GerenciarPedidos from "./pages/GerenciarPedidos";
+import MeusPedidos from "./pages/MeusPedidos";
 
 function App() {
 
@@ -23,6 +25,8 @@ function App() {
 			<Route path="/gerenciarProdutos" element={<GerenciarProdutos/>} />
 			<Route path="/gerenciarUsuarios" element={<GerenciarUsuarios/>} />
 			<Route path="/perfil" element={<Perfil />} />
+			<Route path="/gerenciarPedidos" element={<GerenciarPedidos/>} />
+			<Route path="/meusPedidos" element={<MeusPedidos/>} />
 		</Routes>
 		</BrowserRouter>
 	);

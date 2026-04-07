@@ -6,28 +6,22 @@ export default function Perfil() {
   const [pedidos, setPedidos] = useState([]);
   const [editando, setEditando] = useState(false);
   const [dadosEditados, setDadosEditados] = useState({});
-  const navigate = useNavigate();
   const [menuAberto, setMenuAberto] = useState(false);
-  const [perfil, setPerfil] = useState(null);
-  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [pedidoAberto, setPedidoAberto] = useState(null);
 
-  useEffect(() => {
-    const dadosPerfil = sessionStorage.getItem("perfil");
-    if (dadosPerfil) {
-      setPerfil(JSON.parse(dadosPerfil));
-    }
-  }, []);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setMenuAberto(!menuAberto);
 
-  const irParaPerfil = () => navigate("/perfil");
+  const irParaHome = () => navigate("/");
   const irParaAdmin = () => navigate("/admin");
+  const irParaEntrar = () => navigate("/entrar");
+  const irParaMeusPedidos = () => navigate("/meusPedidos");
 
-  function irParaSair() {
-    sessionStorage.removeItem("usuario");
-    sessionStorage.removeItem("perfil");
+  const irParaSair = () => {
+    sessionStorage.clear();
     navigate("/entrar");
-  }
+  };
 
   useEffect(() => {
     const dadosUsuario = sessionStorage.getItem("usuario");
@@ -37,36 +31,40 @@ export default function Perfil() {
       return;
     }
 
-    const IdUsuario = JSON.parse(dadosUsuario);
+    const usuarioObj = JSON.parse(dadosUsuario);
+    const idUsuario = usuarioObj.idUsuario;
 
-    if (!IdUsuario) {
-      console.error("ID não encontrado", dadosUsuario);
-      return;
-    }
-
-    fetch(`http://localhost:5179/api/Usuario/perfil/${IdUsuario}`)
-      .then((res) => res.json())
+    fetch(`http://localhost:5179/api/Usuario/perfil/${idUsuario}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Erro na API");
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log("USUARIO:", data.usuario);
+        console.log("PEDIDOS:", data.pedidos);
+        console.log("PRIMEIRO PEDIDO:", data.pedidos?.[0]);
+
         setUsuario(data.usuario);
-        setPedidos(data.pedidos);
+        setPedidos(data.pedidos || []);
         setDadosEditados(data.usuario);
       })
-      .catch((err) => console.error("Erro ao buscar perfil:", err));
-  }, [navigate]);
+          .catch((err) => {
+            console.error("Erro ao buscar perfil:", err);
+          });
+        }, [navigate]);
 
   const salvarEdicao = () => {
     const dadosParaEnviar = { ...dadosEditados };
 
-    // ❗ se senha estiver vazia, não manda
     if (!dadosParaEnviar.senha) {
       delete dadosParaEnviar.senha;
     }
 
     fetch(`http://localhost:5179/api/Usuario/${usuario.idUsuario}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dadosParaEnviar),
     })
       .then(() => {
@@ -76,260 +74,309 @@ export default function Perfil() {
       .catch((err) => console.error("Erro ao salvar:", err));
   };
 
+  const getStatusColor = (status) => {
+    if (status === "Entregue") return "#28a745";
+    if (status === "Pendente") return "#ffc107";
+    return "#dc3545";
+  };
+
   if (!usuario) return <p>Carregando...</p>;
 
+   const perfil = usuario.idPerfil || usuario.IdPerfil;
+
   return (
-    <div className="container mt-4">
+    <div style={styles.container}>
 
-    <div style={{ position: "absolute", top: "20px", left: "20px" }}>
-      <div style={{ position: "relative" }}>
-
-        <button 
-          className="btn btn-sm botao"
-          onClick={() => setMenuAberto(!menuAberto)}
-          style={{ fontSize: "20px" }}
-        >
+      <div style={{ position: "absolute", top: "20px", left: "20px" }}>
+        <button onClick={toggleMenu} style={styles.menuButton}>
           ☰
         </button>
 
         {menuAberto && (
-          <div style={{
-            position: "absolute",
-            left: 0,
-            top: "45px",
-            background: "white",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-            padding: "10px",
-            zIndex: 1000,
-            minWidth: "180px"
-          }}>
+          <div style={styles.dropdown}>
 
-            <button 
-              className="dropdown-item"
-              onClick={() => navigate("/")}
-              style={{ padding: "10px", width: "100%", textAlign: "left" }}
+            <button
+              style={styles.item}
+              onClick={() => {
+                setMenuAberto(false);
+                irParaHome();
+              }}
             >
               🏠 Página Inicial
             </button>
+          
+            <button
+              className="dropdown-item"
+              style={{ padding: "10px", width: "100%", textAlign: "left" }}
+              onClick={() => {
+              setMenuAberto(false);
+              irParaMeusPedidos(); }}>
 
-            {usuario.idPerfil < 3 && (
-              <button 
-                className="dropdown-item"
-                onClick={() => navigate("/admin")}
-                style={{ padding: "10px", width: "100%", textAlign: "left" }}
+              📦 Meus Pedidos
+						</button>
+
+            {perfil < 3 && (
+              <button
+                style={styles.item}
+                onClick={() => {
+                  setMenuAberto(false);
+                  irParaAdmin();
+                }}
               >
                 ⚙️ Administração
               </button>
             )}
 
-            <hr />
+            <hr style={styles.divider} />
 
-            <button 
-              className="dropdown-item text-danger"
+            <button
+              style={{ ...styles.item, color: "#dc3545" }}
               onClick={() => {
-                sessionStorage.removeItem("usuario");
-                sessionStorage.removeItem("perfil");
-                navigate("/entrar");
+                setMenuAberto(false);
+                irParaSair();
               }}
-              style={{ padding: "10px", width: "100%", textAlign: "left" }}
             >
-              Sair
+              🚪 Sair
             </button>
-
           </div>
         )}
       </div>
-    </div>
 
-      <div className="card p-4 shadow">
+      <div style={styles.content}>
+        <div style={styles.card}>
+          <div style={styles.header}>
+            <h2>Meu Perfil</h2>
 
-        <div className="d-flex justify-content-between align-items-center">
-          <h2>Perfil</h2>
-
-          {!editando ? (
-            <button
-              className="btn btn-primary"
-              onClick={() => setEditando(true)}
-            >
-              Editar
-            </button>
-          ) : (
-            <button
-              className="btn btn-success"
-              onClick={salvarEdicao}
-            >
-              Salvar
-            </button>
-          )}
-        </div>
-
-        <div className="mt-3">
-
-          <p>
-            <strong>Nome:</strong>{" "}
-            {editando ? (
-              <input
-                className="form-control"
-                value={dadosEditados.nome || ""}
-                onChange={(e) =>
-                  setDadosEditados({ ...dadosEditados, nome: e.target.value })
-                }
-              />
+            {!editando ? (
+              <button style={styles.btnPrimary} onClick={() => setEditando(true)}>
+                Editar
+              </button>
             ) : (
-              usuario.nome
+              <button style={styles.btnSuccess} onClick={salvarEdicao}>
+                Salvar
+              </button>
             )}
-          </p>
+          </div>
 
-          <p>
-            <strong>CPF:</strong>{" "}
-            {editando ? (
-              <input
-                className="form-control"
-                value={dadosEditados.cpf || ""}
-                onChange={(e) =>
-                  setDadosEditados({ ...dadosEditados, cpf: e.target.value })
-                }
-              />
-            ) : (
-              usuario.cpf
-            )}
-          </p>
+          <div style={styles.form}>
+            {["nome", "cpf", "email", "telefone", "endereco"].map((campo) => (
+              <div key={campo}>
+                <label style={styles.label}>{campo.toUpperCase()}</label>
 
-          <p>
-            <strong>Email:</strong>{" "}
-            {editando ? (
-              <input
-                className="form-control"
-                value={dadosEditados.email || ""}
-                onChange={(e) =>
-                  setDadosEditados({ ...dadosEditados, email: e.target.value })
-                }
-              />
-            ) : (
-              usuario.email
-            )}
-          </p>
-
-          <p>
-            <strong>Telefone:</strong>{" "}
-            {editando ? (
-              <input
-                className="form-control"
-                value={dadosEditados.telefone || ""}
-                onChange={(e) =>
-                  setDadosEditados({ ...dadosEditados, telefone: e.target.value })
-                }
-              />
-            ) : (
-              usuario.telefone
-            )}
-          </p>
-
-          <p>
-            <strong>Endereço:</strong>{" "}
-            {editando ? (
-              <input
-                className="form-control"
-                value={dadosEditados.endereco || ""}
-                onChange={(e) =>
-                  setDadosEditados({ ...dadosEditados, endereco: e.target.value })
-                }
-              />
-            ) : (
-              usuario.endereco
-            )}
-          </p>
-
-          <p>
-            <strong>Senha:</strong>{" "}
-
-            {editando ? (
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  className="form-control"
-                  value={dadosEditados.senha || ""}
-                  onChange={(e) =>
-                    setDadosEditados({ ...dadosEditados, senha: e.target.value })
-                  }
-                />
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                >
-                  {mostrarSenha ? "🙈" : "👁️"}
-                </button>
+                {editando ? (
+                  <input
+                    style={styles.input}
+                    value={dadosEditados[campo] || ""}
+                    onChange={(e) =>
+                      setDadosEditados({
+                        ...dadosEditados,
+                        [campo]: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  <p style={styles.text}>{usuario[campo]}</p>
+                )}
               </div>
-            ) : (
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  className="form-control"
-                  value={usuario.senha || ""}
-                  readOnly
-                />
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                >
-                  {mostrarSenha ? "🙈" : "👁️"}
-                </button>
-              </div>
-            )}
-          </p>
-
+            ))}
+          </div>
         </div>
       </div>
-
-      {usuario.idPerfil === 3 && (
-        <div className="card mt-4 p-4 shadow">
-          <h3>Últimos Pedidos</h3>
-
-          {pedidos.length === 0 ? (
-            <p>Nenhum pedido encontrado</p>
-          ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Status</th>
-                  <th>Valor</th>
-                  <th>Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pedidos.map((pedido) => (
-                  <tr key={pedido.idPedido}>
-                    <td>{pedido.idPedido}</td>
-                    <td>{pedido.statusPedido}</td>
-                    <td>R$ {pedido.valorTotal}</td>
-                    <td>
-                      {new Date(pedido.dataPedido).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
     </div>
   );
 }
 
-const botaoVoltar = {
-  position: "absolute",
-  top: "20px",
-  left: "20px",
-  padding: "8px 14px",
-  borderRadius: "10px",
-  border: "none",
-  background: "#fff",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  cursor: "pointer",
+const styles = {
+  container: {
+    background: "#f7eee7",
+    minHeight: "100vh",
+    padding: "20px",
+    fontFamily: "Arial",
+  },
+
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "25px",
+  },
+
+  card: {
+    background: "#fff",
+    borderRadius: "18px",
+    padding: "25px",
+    border: "2px solid #a87f67",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    width: "100%",
+    maxWidth: "800px",
+  },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "25px",
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+  },
+
+  label: {
+    fontSize: "12px",
+    color: "#7a5c4d",
+  },
+
+  text: {
+    fontSize: "16px",
+    color: "#4B2E2E",
+  },
+
+  input: {
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #ccac99",
+    background: "#fdf6f2",
+    outline: "none",
+  },
+
+  btnPrimary: {
+    background: "#ccac99",
+    color: "#fff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  btnSuccess: {
+    background: "#8B4513",
+    color: "#fff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  listaPedidos: {
+    marginTop: "15px",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
+  },
+
+  pedidoCard: {
+    background: "#fff",
+    borderRadius: "12px",
+    padding: "15px",
+    border: "1px solid #e0e0e0",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+
+  pedidoHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  pedidoInfo: {
+    fontSize: "13px",
+    color: "#666",
+  },
+
+  statusBadge: {
+    background: "#e6f4ea",
+    color: "#2e7d32",
+    padding: "4px 8px",
+    borderRadius: "6px",
+    fontSize: "12px",
+    fontWeight: "bold",
+  },
+
+  valor: {
+    fontWeight: "bold",
+    color: "#4B2E2E",
+  },
+
+  detalhes: {
+    marginTop: "10px",
+    paddingTop: "10px",
+    borderTop: "1px solid #eee",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+
+  itemPedido: {
+    fontSize: "13px",
+    color: "#444",
+    borderTop: "1px solid #eee",
+    paddingTop: "6px",
+  },
+
+  acoes: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "10px",
+  },
+
+  btnLink: {
+    background: "none",
+    border: "none",
+    color: "#e53935",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "13px",
+  },
+
+  seta: {
+    marginLeft: "8px",
+    fontSize: "12px",
+    color: "#7a5c4d",
+  },
+
+  menuButton: {
+    fontSize: "20px",
+    background: "#ccac99",
+    color: "#fff",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+  },
+
+  dropdown: {
+    position: "absolute",
+    top: "45px",
+    left: 0,
+    background: "#fff",
+    borderRadius: "12px",
+    padding: "10px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+    minWidth: "200px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
+  },
+
+  item: {
+    padding: "10px",
+    border: "none",
+    background: "transparent",
+    textAlign: "left",
+    cursor: "pointer",
+    borderRadius: "8px",
+    fontSize: "14px",
+  },
+
+  divider: {
+    margin: "8px 0",
+    borderColor: "#eee",
+  },
 };

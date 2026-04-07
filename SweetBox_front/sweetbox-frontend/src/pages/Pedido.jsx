@@ -15,6 +15,20 @@ export default function Pedidos() {
     carregarProdutos();
   }, []);
 
+  useEffect(() => {
+    if (produtoSelecionado) {
+      setCarrinhoAberto(false);
+    }
+  }, [produtoSelecionado]);
+
+  useEffect(() => {
+    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+
+    if (!usuario) {
+      navigate("/login");
+    }
+  }, []);
+
   async function carregarProdutos() {
     const resp = await fetch(API_URL);
     const data = await resp.json();
@@ -24,29 +38,77 @@ export default function Pedidos() {
   function adicionarAoCarrinho(item) {
     const produto = produtos.find((p) => p.idProduto === item.idProduto);
 
-    setCarrinho((prev) => [
-      ...prev,
-      {
-        ...item,
-        nomeProduto: produto?.nomeProduto || "Produto",
-      },
-    ]);
+    const novoItem = {
+      ...item,
+      nomeProduto: produto?.nomeProduto || "Produto",
+    };
+
+    if (produtoSelecionado?.indexCarrinho !== undefined) {
+      setCarrinho(prev => {
+        const copia = [...prev];
+        copia[produtoSelecionado.indexCarrinho] = novoItem;
+        return copia;
+      });
+    } else {
+      setCarrinho(prev => [...prev, novoItem]);
+    }
+
+    setProdutoSelecionado(null);
   }
 
   function removerItem(index) {
   setCarrinho((prev) => prev.filter((_, i) => i !== index));
-}
+  }
+
+  function editarItem(index) {
+    const item = carrinho[index];
+
+    const produto = produtos.find(p => p.idProduto === item.idProduto);
+
+    setCarrinhoAberto(false);
+
+    setProdutoSelecionado({
+      ...produto,
+      itemEditando: item,
+      indexCarrinho: index
+    });
+  }
 
   async function finalizarPedido() {
+    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+
+    if (!usuario) {
+      alert("Faça login primeiro!");
+      return;
+    }
+
+    const idUsuario = usuario;
+
+    if (!idUsuario) {
+      alert("Erro: usuário inválido. Faça login novamente.");
+      return;
+    }
+
+    if (carrinho.length === 0) {
+      alert("Carrinho vazio!");
+      return;
+    }
+
+    const total = carrinho.reduce(
+      (t, i) => t + (i.precoTotal || i.precoUnitario),
+      0
+    );
+
     const pedido = {
-      idCliente: 1,
+      idCliente: usuario.idUsuario,
       itens: carrinho.map(item => ({
         idProduto: item.idProduto,
         quantidade: item.quantidade,
         precoUnitario: item.precoTotal || item.precoUnitario,
         parametrosBolo: (item.parametrosBolo || []).map(p => ({
           idParametro: p.idParametro,
-          valorEscolhido: p.valorEscolhido
+          valorEscolhido: p.valorEscolhido,
+          quantidade: p.quantidade || 0
         }))
       }))
     };
@@ -62,11 +124,14 @@ export default function Pedidos() {
 
       if (!resp.ok) {
         const erro = await resp.text();
-        throw new Error(erro);
+        console.error("ERRO BACKEND:", erro);
+        alert(erro);
+        return;
       }
 
       alert("Pedido enviado com sucesso!");
       setCarrinho([]);
+
     } catch (err) {
       console.error(err);
       alert("Erro ao enviar pedido!");
@@ -93,7 +158,10 @@ export default function Pedidos() {
                   key={p.idProduto}
                   style={card}
                   className="card-hover"
-                  onClick={() => setProdutoSelecionado(p)}
+                  onClick={() => {
+                    setCarrinhoAberto(false);
+                    setProdutoSelecionado(p);
+                  }}                
                 >
                   <img
                     src={
@@ -125,6 +193,7 @@ export default function Pedidos() {
             )}
           </div>
         </div>
+      {!produtoSelecionado && (
         <button
           onClick={() => setCarrinhoAberto(true)}
           style={{
@@ -141,7 +210,6 @@ export default function Pedidos() {
             cursor: "pointer",
             boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
             zIndex: 1000,
-
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -149,6 +217,7 @@ export default function Pedidos() {
         >
           🛒
         </button>
+      )}
           {carrinhoAberto && (
             <div
               onClick={() => setCarrinhoAberto(false)}
@@ -204,6 +273,20 @@ export default function Pedidos() {
                         position: "relative",
                       }}
                     >
+                      <button
+                        onClick={() => editarItem(index)}
+                        style={{
+                          position: "absolute",
+                          right: "25px",
+                          top: "0",
+                          border: "none",
+                          background: "transparent",
+                          color: "#555",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ✏️
+                      </button>
                       <button
                         onClick={() =>
                           setCarrinho((prev) =>
@@ -288,6 +371,38 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
   const [valores, setValores] = useState({});
   const [recheio1, setRecheio1] = useState(null);
   const [recheio2, setRecheio2] = useState(null);
+
+  useEffect(() => {
+    if (produto.itemEditando) {
+      const item = produto.itemEditando;
+
+      const novosValores = {};
+
+      item.parametrosBolo?.forEach(p => {
+        const encontrado = produto.produtosParametrosBolo.find(
+          x => x.idParametro === p.idParametro
+        );
+
+        if (encontrado?.tipoParametro === "Tamanho") {
+          novosValores.tamanho = encontrado;
+        }
+
+        if (encontrado?.tipoParametro === "Massa") {
+          novosValores.massa = encontrado;
+        }
+
+        if (encontrado?.tipoParametro === "Recheio1") {
+          setRecheio1(encontrado);
+        }
+
+        if (encontrado?.tipoParametro === "Recheio2") {
+          setRecheio2(encontrado);
+        }
+      });
+
+      setValores(novosValores);
+    }
+  }, [produto]);
 
   const parametros = produto.produtosParametrosBolo;
 
@@ -393,7 +508,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
           <option>Selecione</option>
           {tamanhos.map((t) => (
             <option key={t.idParametro} value={t.idParametro}>
-              {t.nomeParametro}
+              {t.nomeParametro}  {t.descParametro}
             </option>
           ))}
         </select>
@@ -432,7 +547,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
               }}
               onClick={() => setRecheio1(r)}
             >
-              {r.nomeParametro}
+              {r.nomeParametro} {r.descParametro}
             </div>
           ))}
         </div>
@@ -453,7 +568,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
               }}
               onClick={() => setRecheio2(r)}
             >
-              {r.nomeParametro}
+              {r.nomeParametro} {r.descParametro}
             </div>
           ))}
         </div>
@@ -474,6 +589,18 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
 
 function ModalDoces({ produto, fechar, adicionarAoCarrinho }) {
   const [sabores, setSabores] = useState({});
+
+  useEffect(() => {
+    if (produto.itemEditando) {
+      const novos = {};
+
+      produto.itemEditando.parametrosBolo?.forEach(p => {
+        novos[p.idParametro] = p.quantidade;
+      });
+
+      setSabores(novos);
+    }
+  }, [produto]);
 
   const saboresDisponiveis = produto.produtosParametrosBolo.filter(
     (p) => p.tipoParametro === "SaborDoces"
@@ -552,7 +679,7 @@ function ModalDoces({ produto, fechar, adicionarAoCarrinho }) {
         <div style={conteudoModal}>
           {saboresDisponiveis.map((sabor) => (
             <div key={sabor.idParametro} style={linhaSabor}>
-              <span>{sabor.nomeParametro}</span>
+              <span>{sabor.nomeParametro} {sabor.descParametro}</span>
 
               <div style={controle}>
                 <button
@@ -591,6 +718,18 @@ function ModalDoces({ produto, fechar, adicionarAoCarrinho }) {
 
 function ModalBombom({ produto, fechar, adicionarAoCarrinho }) {
   const [sabores, setSabores] = useState({});
+
+  useEffect(() => {
+    if (produto.itemEditando) {
+      const novos = {};
+
+      produto.itemEditando.parametrosBolo?.forEach(p => {
+        novos[p.idParametro] = p.quantidade;
+      });
+
+      setSabores(novos);
+    }
+  }, [produto]);
 
   const saboresDisponiveis = produto.produtosParametrosBolo.filter(
     (p) => p.tipoParametro === "SaborBombom"
@@ -649,7 +788,7 @@ function ModalBombom({ produto, fechar, adicionarAoCarrinho }) {
     adicionarAoCarrinho({
       idProduto: produto.idProduto,
       quantidade: total,
-      precoUnitario: calcularPreco(), // ✅ correto
+      precoUnitario: calcularPreco(),
       parametrosBolo: itens,
     });
 
@@ -667,7 +806,7 @@ function ModalBombom({ produto, fechar, adicionarAoCarrinho }) {
         <div style={conteudoModal}>
           {saboresDisponiveis.map((sabor) => (
             <div key={sabor.idParametro} style={linhaSabor}>
-              <span>{sabor.nomeParametro}</span>
+              <span>{sabor.nomeParametro} {sabor.descParametro}</span>
 
               <div style={controle}>
                 <button
@@ -829,7 +968,7 @@ const modalFundo = {
 
 const modalBox = {
   background: "#fff",
-  padding: "25px",
+  padding: "25px 25px 0 25px",
   borderRadius: "20px",
   width: "500px",         
   maxHeight: "80vh",      
@@ -917,11 +1056,17 @@ const conteudoModal = {
 };
 
 const footerModal = {
+  position: "sticky",
+  bottom: 0,
+  background: "#fff",
   borderTop: "1px solid #eee",
-  paddingTop: "10px",
+  padding: "15px 20px",
+  margin: "0 -25px",  
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+  zIndex: 10,
+  boxShadow: "0 -2px 10px rgba(0,0,0,0.1)"
 };
 
 const btnFechar = {
