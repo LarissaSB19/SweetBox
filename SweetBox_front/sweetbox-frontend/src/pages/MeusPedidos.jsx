@@ -1,265 +1,434 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function MeusPedidos() {
-  const [pedidos, setPedidos] = useState([]);
-  const [menuAberto, setMenuAberto] = useState(false);
-  const [pedidoAberto, setPedidoAberto] = useState(null);
 
-  const navigate = useNavigate();
+const [pedidos, setPedidos] = useState([]);
+const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
 
-  const irParaHome = () => navigate("/");
-  const irParaPerfil = () => navigate("/perfil");
+useEffect(() => {
+carregarPedidos();
+}, []);
 
-  useEffect(() => {
-    recarregarPedidos();
-  }, []);
+const carregarPedidos = () => {
 
-  const cancelarPedido = async (id) => {
-    if (!window.confirm("Tem certeza que deseja cancelar este pedido?")) return;
+  const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+  const idUsuario = usuario?.idUsuario;
 
-    const pedido = pedidos.find((p) => (p.idPedido ?? p.IdPedido) === id);
-    if (!pedido) return;
+  fetch(`http://localhost:5179/api/Usuario/perfil/${idUsuario}`)
+  .then(res => res.json())
+  .then(data => setPedidos(data.pedidos || []));
 
-    const atualizado = { ...pedido, statusPedido: "Cancelado" };
+};
 
-    try {
-      const resp = await fetch(`http://localhost:5179/api/Pedido/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(atualizado),
-      });
+const cancelarPedido = async (idPedido) => {
 
-      if (!resp.ok) throw new Error("Erro ao atualizar pedido");
+const confirmar = window.confirm("Deseja realmente cancelar este pedido?");
 
-      await recarregarPedidos();
-    } catch (err) {
-      console.error("Erro ao cancelar:", err);
-    }
-  };
+if(!confirmar) return;
 
-  const recarregarPedidos = () => {
-    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
-    const idUsuario = usuario?.idUsuario;
+try{
 
-    fetch(`http://localhost:5179/api/Usuario/perfil/${idUsuario}`)
-      .then((res) => res.json())
-      .then((data) => setPedidos(data.pedidos || []));
-  };
+await fetch(`http://localhost:5179/api/Pedido/${idPedido}/status`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+statusPedido:"Cancelado"
+})
+});
 
-  const getStatus = (p) => p.statusPedido ?? p.StatusPedido;
-  const getId = (p) => p.idPedido ?? p.IdPedido;
-  const getValor = (p) => p.valorTotal ?? p.ValorTotal;
-  const getData = (p) => p.dataPedido ?? p.DataPedido;
-  const getItens = (p) => p.pedidoItens ?? p.PedidoItens ?? [];
+setPedidos(prev =>
+prev.map(p =>
+(p.idPedido ?? p.IdPedido) === idPedido
+? {...p, statusPedido:"Cancelado"}
+: p
+)
+);
 
-  const pedidosAtivos = pedidos.filter(
-    (p) => getStatus(p) !== "Finalizado" && getStatus(p) !== "Cancelado"
-  );
+}catch(err){
+console.error("Erro ao cancelar pedido",err);
+}
 
-  const pedidosFinalizados = pedidos.filter(
-    (p) => getStatus(p) === "Finalizado" || getStatus(p) === "Cancelado"
-  );
+};
 
-  const renderPedido = (p, ativo = true) => {
-    const id = getId(p);
-    const status = getStatus(p);
-    const itens = getItens(p);
-    const aberto = pedidoAberto === id;
+const getStatusColor = (status) => {
 
-    const badgeColor =
-      status === "Entregue"
-        ? "#8DC891"
-        : status === "Cancelado"
-        ? "#D17A7A"
-        : "#D6B88A";
+if(status === "Finalizado") return "#6FAF8D";
+if(status === "Cancelado") return "#D77A7A";
+if(status === "Em Preparo") return "#6FA8DC";
 
-    return (
-      <div key={id} style={{ ...styles.card, cursor: aberto ? "default" : "pointer" }}>
-        <div style={styles.cardHeader}>
-          <div>
-            <strong style={styles.tituloPedido}>Pedido #{id}</strong>
-            <p style={styles.dataPedido}>{new Date(getData(p)).toLocaleDateString()}</p>
-          </div>
-          <span style={{ ...styles.badge, background: badgeColor }}>{status}</span>
-        </div>
+return "#C49A6C";
 
-        {aberto && (
-          <div style={styles.itens}>
-            {itens.length === 0 ? (
-              <p style={styles.semItens}>Sem itens</p>
-            ) : (
-              itens.map((item, index) => {
-                const nome = item.produto?.nomeProduto ?? item.produto?.nome ?? "Produto";
-                const quantidade = item.quantidade ?? item.Quantidade;
-                const preco = item.precoUnitario ?? item.PrecoUnitario;
-                return (
-                  <div key={index} style={styles.item}>
-                    <span>{quantidade}x {nome}</span>
-                    <span>R$ {Number(preco).toFixed(2)}</span>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
+};
 
-        <div style={styles.cardFooter}>
-          {ativo && status !== "Cancelado" && status !== "Entregue" && (
-            <button style={styles.btnCancelar} onClick={() => cancelarPedido(id)}>Cancelar</button>
-          )}
-          <button
-            style={styles.btnDetalhes}
-            onClick={() => setPedidoAberto(aberto ? null : id)}
-          >
-            {aberto ? "Fechar" : "Ver detalhes"}
-          </button>
-        </div>
-      </div>
-    );
-  };
+const pedidosAtivos = pedidos.filter(p => {
+const status = p.statusPedido ?? p.StatusPedido;
+return status !== "Finalizado" && status !== "Cancelado";
+});
 
-  return (
-    <div style={styles.container}>
-        <button onClick={() => setMenuAberto(!menuAberto)} style={styles.menuButton} >
-             ☰ 
-        </button> 
-        {menuAberto && ( 
-            <div style={styles.dropdown}> 
-                <button style={styles.itemMenu} onClick={irParaHome}> 
-                    🏠 Página Inicial 
-                </button> 
-                <button style={styles.itemMenu} onClick={irParaPerfil}> 
-                    👤 Perfil 
-                </button> 
-                <button style={{ ...styles.itemMenu, color: "red" }} onClick={() => { sessionStorage.clear(); navigate("/entrar"); }} > 
-                    🚪 Sair 
-                </button> 
-            </div>
-         )}
+const pedidosFinalizados = pedidos.filter(p => {
+const status = p.statusPedido ?? p.StatusPedido;
+return status === "Finalizado" || status === "Cancelado";
+});
 
-      <h1 style={styles.tituloPagina}>📦 Meus Pedidos</h1>
+const renderPedido = (p) => {
 
-      <h2 style={styles.subtitulo}>🟡 Em andamento</h2>
-      <div style={styles.grid}>{pedidosAtivos.map((p) => renderPedido(p, true))}</div>
+const id = p.idPedido ?? p.IdPedido;
+const status = p.statusPedido ?? p.StatusPedido;
+const data = p.dataPedido ?? p.DataPedido;
+const itens = p.itens ?? p.pedidoItens ?? [];
+const valor = p.valorTotal ?? p.ValorTotal;
 
-      <h2 style={styles.subtituloFinal}>🟢 Finalizados / Cancelados</h2>
-      <div style={styles.grid}>{pedidosFinalizados.map((p) => renderPedido(p, false))}</div>
-    </div>
-  );
+return(
+
+<div 
+key={id} 
+style={{...styles.card, cursor:"pointer"}}
+onClick={() => setPedidoSelecionado(p)}
+>
+
+<div style={styles.headerPedido}>
+
+<div>
+<h3 style={styles.numeroPedido}>Pedido #{id}</h3>
+<p style={styles.data}>
+{new Date(data).toLocaleDateString()}
+</p>
+</div>
+
+<span style={{
+...styles.badge,
+background:getStatusColor(status)
+}}>
+{status}
+</span>
+
+</div>
+
+<div style={styles.itens}>
+
+{itens.map((item,index)=>{
+
+const nome = item.nomeProduto ?? item.produto?.nomeProduto ?? "Produto";
+const qtd = item.quantidade ?? 1;
+const preco = item.preco ?? item.precoUnitario ?? 0;
+
+return(
+
+<div key={index} style={styles.item}>
+
+<span>{qtd}x {nome}</span>
+<span>R$ {Number(preco).toFixed(2)}</span>
+
+</div>
+
+);
+
+})}
+
+</div>
+
+<div style={styles.total}>
+Total: R$ {Number(valor).toFixed(2)}
+</div>
+
+<div style={styles.botoesPedido}>
+
+<button
+style={styles.btnDetalhes}
+onClick={(e)=>{
+e.stopPropagation();
+setPedidoSelecionado(p);
+}}
+>
+Detalhes
+</button>
+
+{status !== "Cancelado" && status !== "Finalizado" && (
+
+<button
+style={styles.btnCancelar}
+onClick={(e)=>{
+e.stopPropagation();
+cancelarPedido(id);
+}}
+>
+Cancelar
+</button>
+
+)}
+
+</div>
+
+</div>
+
+);
+
+};
+
+return (
+
+<div style={styles.container}>
+
+<h1 style={styles.titulo}>📦 Meus Pedidos</h1>
+
+<h2 style={styles.subtitulo}>🕒 Pedidos em andamento</h2>
+
+<div style={styles.grid}>
+
+{pedidosAtivos.length === 0 && (
+<p>Nenhum pedido em andamento</p>
+)}
+
+{pedidosAtivos.map(renderPedido)}
+
+</div>
+
+<h2 style={styles.subtitulo}>✅ Pedidos finalizados</h2>
+
+<div style={styles.grid}>
+
+{pedidosFinalizados.length === 0 && (
+<p>Nenhum pedido finalizado</p>
+)}
+
+{pedidosFinalizados.map(renderPedido)}
+
+</div>
+
+
+{pedidoSelecionado && (
+
+<div style={styles.modalBackground} onClick={() => setPedidoSelecionado(null)}>
+
+<div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+
+<h2 style={{color:"#5a3e36"}}>
+Pedido #{pedidoSelecionado.idPedido ?? pedidoSelecionado.IdPedido}
+</h2>
+
+<p>
+<strong>Cliente:</strong> {pedidoSelecionado.usuario?.nome}
+</p>
+
+<p>
+<strong>Data:</strong>{" "}
+{new Date(pedidoSelecionado.dataPedido ?? pedidoSelecionado.DataPedido).toLocaleString()}
+</p>
+
+<p>
+<strong>Status:</strong> {pedidoSelecionado.statusPedido ?? pedidoSelecionado.StatusPedido}
+</p>
+
+<h3 style={{ marginTop: "15px", color:"#6a4b3b" }}>
+🧾 Itens do pedido
+</h3>
+
+{(pedidoSelecionado.pedidoItens ?? pedidoSelecionado.itens ?? []).map((item, index) => (
+
+<div key={index} style={styles.itemCard}>
+
+<div style={{ display: "flex", justifyContent: "space-between" }}>
+
+<strong style={{ fontSize: "16px" }}>
+{item.produto?.nomeProduto ?? item.nomeProduto}
+</strong>
+
+<span>
+R$ {Number(item.precoUnitario ?? item.preco ?? 0).toFixed(2)}
+</span>
+
+</div>
+
+<div style={{ fontSize: "13px", color: "#666", marginBottom: "5px" }}>
+{item.quantidade ?? item.Quantidade}x
+</div>
+
+<div style={{ fontSize: "13px", color: "#444" }}>
+
+{item.pedidoItemParametroBolo?.map((p, i) => (
+
+<div key={i}>
+• {p.valorEscolhido} ({p.quantidade})
+</div>
+
+))}
+
+</div>
+
+</div>
+
+))}
+
+<h3 style={{color:"#8b5a3c"}}>
+Total: R$ {Number(pedidoSelecionado.valorTotal ?? pedidoSelecionado.ValorTotal).toFixed(2)}
+</h3>
+
+<button
+onClick={() => setPedidoSelecionado(null)}
+style={styles.btnFecharModal}
+>
+Fechar
+</button>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+);
+
 }
 
 const styles = {
-  container: {
-    padding: "20px",
-    background: "#f7eee7",
-    minHeight: "100vh",
-    fontFamily: "'Segoe UI', sans-serif",
-  },
-  tituloPagina: {
-    color: "#5a3e36",
-    fontSize: "26px",
-    marginBottom: "20px",
-  },
-  subtitulo: {
-    color: "#7a5c4d",
-    marginBottom: "10px",
-  },
-  subtituloFinal: {
-    color: "#7a5c4d",
-    marginTop: "30px",
-    marginBottom: "10px",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-    gap: "15px",
-  },
-  card: {
-    background: "#fffaf7",
-    borderRadius: "12px",
-    padding: "15px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    boxShadow: "0 3px 8px rgba(0,0,0,0.1)",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
-  tituloPedido: {
-    fontSize: "16px",
-    color: "#5a3e36",
-  },
-  dataPedido: {
-    fontSize: "12px",
-    color: "#8c6b5a",
-    margin: 0,
-  },
-  badge: {
-    color: "#fff",
-    padding: "4px 10px",
-    borderRadius: "10px",
-    fontSize: "11px",
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-  itens: {
-    borderTop: "1px solid #e6d7c8",
-    paddingTop: "10px",
-    marginTop: "10px",
-  },
-  item: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "14px",
-    marginBottom: "5px",
-    color: "#5a3e36",
-  },
-  semItens: {
-    fontSize: "13px",
-    color: "#a1887f",
-  },
-  cardFooter: {
-    display: "flex",
-    gap: "10px",
-    marginTop: "10px",
-  },
-  btnCancelar: {
-    flex: 1,
-    background: "#d17a7a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    padding: "8px",
-    cursor: "pointer",
-  },
-  btnDetalhes: {
-    flex: 1,
-    background: "#d6b88a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    padding: "8px",
-    cursor: "pointer",
-  },
 
-  dropdown: { 
-    position: "absolute", 
-    top: "50px", left: "20px", 
-    background: "#fff", 
-    padding: "10px", 
-    borderRadius: "10px", },
+container:{
+padding:"40px",
+background:"#f5eee9",
+minHeight:"100vh",
+fontFamily:"Segoe UI"
+},
 
-  itemMenu: {
-    display: "block",
-    width: "100%", 
-    padding: "8px", 
-    border: "none", 
-    background: "transparent", 
-    textAlign: "left", 
-    cursor: "pointer", },
+titulo:{
+fontSize:"32px",
+color:"#5a3e36",
+marginBottom:"20px"
+},
+
+subtitulo:{
+marginTop:"40px",
+marginBottom:"20px",
+color:"#6a4b3b"
+},
+
+grid:{
+display:"grid",
+gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",
+gap:"20px"
+},
+
+card:{
+background:"#ffffff",
+borderRadius:"14px",
+padding:"20px",
+boxShadow:"0 8px 20px rgba(0,0,0,0.08)",
+display:"flex",
+flexDirection:"column"
+},
+
+headerPedido:{
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:"15px"
+},
+
+numeroPedido:{
+margin:0,
+color:"#5a3e36"
+},
+
+data:{
+margin:0,
+fontSize:"13px",
+color:"#9b7d6f"
+},
+
+badge:{
+color:"#fff",
+padding:"5px 12px",
+borderRadius:"20px",
+fontSize:"12px",
+fontWeight:"600"
+},
+
+itens:{
+borderTop:"1px solid #eee",
+paddingTop:"10px"
+},
+
+item:{
+display:"flex",
+justifyContent:"space-between",
+marginBottom:"6px",
+color:"#4b2e2b"
+},
+
+total:{
+marginTop:"10px",
+fontWeight:"bold",
+color:"#8b5a3c",
+fontSize:"16px"
+},
+
+modalBackground:{
+position:"fixed",
+top:0,
+left:0,
+width:"100%",
+height:"100%",
+background:"rgba(0,0,0,0.5)",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+zIndex:999
+},
+
+modalContent:{
+background:"#fff",
+padding:"30px",
+borderRadius:"14px",
+width:"420px",
+maxHeight:"80vh",
+overflowY:"auto",
+boxShadow:"0 10px 30px rgba(0,0,0,0.2)"
+},
+
+itemCard:{
+background:"#f9f3ef",
+padding:"10px",
+borderRadius:"8px",
+marginBottom:"10px"
+},
+
+btnFecharModal:{
+marginTop:"20px",
+background:"#8b5a3c",
+color:"#fff",
+border:"none",
+padding:"10px 18px",
+borderRadius:"8px",
+cursor:"pointer"
+},
+
+botoesPedido:{
+display:"flex",
+gap:"10px",
+marginTop:"15px"
+},
+
+btnDetalhes:{
+flex:1,
+background:"#C49A6C",
+color:"#fff",
+border:"none",
+padding:"8px",
+borderRadius:"8px",
+cursor:"pointer"
+},
+
+btnCancelar:{
+flex:1,
+background:"#D77A7A",
+color:"#fff",
+border:"none",
+padding:"8px",
+borderRadius:"8px",
+cursor:"pointer"
+},
+
 };

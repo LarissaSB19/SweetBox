@@ -68,27 +68,25 @@ export default function Home() {
 					<div style={{ position: "relative" }}>
 
 						<button 
-							className="btn btn-sm botao"
-							onClick={toggleMenu}
-							style={{ fontSize: "20px" }}
+						className="btn btn-sm botao"
+						onClick={() => setMenuAberto(!menuAberto)}
+						style={{ fontSize: "20px" }}
 						>
-							☰
+						☰
 						</button>
 
 						{menuAberto && (
-							<div 
-								style={{
-									position: "absolute",
-									left: 0,
-									top: "45px",
-									background: "white",
-									borderRadius: "10px",
-									boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-									padding: "10px",
-									zIndex: 1000,
-									minWidth: "180px"
-								}}
-							>
+							<div style={{
+								position: "absolute",
+								left: 0,
+								top: "45px",
+								background: "white",
+								borderRadius: "10px",
+								boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+								padding: "10px",
+								zIndex: 1000,
+								minWidth: "180px"
+							}}>
 								<button 
 									className="dropdown-item"
 									style={{ padding: "10px", width: "100%", textAlign: "left" }}

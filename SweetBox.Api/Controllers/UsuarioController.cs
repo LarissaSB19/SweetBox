@@ -49,25 +49,35 @@ public class UsuarioController : ControllerBase
         if (usuario == null)
             return NotFound();
 
-        var pedidos = await _context.Pedidos
-            .Where(p => p.IdUsuario == id)
-            .Include(p => p.PedidoItens)
-                .ThenInclude(pi => pi.Produto)
-            .Select(p => new {
-                p.IdPedido,
-                p.DataPedido,
-                p.ValorTotal,
-                p.StatusPedido,
-                p.FormaPagamento,
+            var pedidos = await _context.Pedidos
+                .Where(p => p.IdUsuario == id)
+                .Include(p => p.PedidoItens)
+                    .ThenInclude(pi => pi.Produto)
+                .Include(p => p.PedidoItens)
+                    .ThenInclude(pi => pi.PedidoItemParametroBolo)
+                .Select(p => new {
+                    p.IdPedido,
+                    p.DataPedido,
+                    p.ValorTotal,
+                    p.StatusPedido,
+                    p.FormaPagamento,
 
-                itens = p.PedidoItens.Select(i => new {
-                    nomeProduto = i.Produto.NomeProduto,
-                    quantidade = i.Quantidade,
-                    preco = i.PrecoUnitario
+                    pedidoItens = p.PedidoItens.Select(i => new {
+                        produto = new
+                        {
+                            nomeProduto = i.Produto.NomeProduto
+                        },
+                        quantidade = i.Quantidade,
+                        precoUnitario = i.PrecoUnitario,
+
+                        pedidoItemParametroBolo = i.PedidoItemParametroBolo.Select(param => new {
+                            valorEscolhido = param.ValorEscolhido,
+                            quantidade = param.Quantidade
+                        })
+                    })
                 })
-            })
-            .OrderByDescending(p => p.DataPedido)
-            .ToListAsync();
+                .OrderByDescending(p => p.DataPedido)
+                .ToListAsync();
 
         return Ok(new
         {

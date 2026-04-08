@@ -8,8 +8,8 @@ export default function Admin() {
 
 	const toggleMenu = () => setMenuAberto(!menuAberto);
 
+	const irParaHome = () => navigate("/")
 	const irParaPerfil = () => navigate("/perfil");
-	const irParaAdmin = () => navigate("/admin");
 	const irParaMeusPedidos = () => navigate("/meusPedidos");
 
 	function irParaSair() {
@@ -47,17 +47,17 @@ export default function Admin() {
 				</button>
 
 				{menuAberto && (
-				<div style={{
-					position: "absolute",
-					left: 0,
-					top: "45px",
-					background: "white",
-					borderRadius: "10px",
-					boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-					padding: "10px",
-					zIndex: 1000,
-					minWidth: "180px"
-				}}>
+					<div style={{
+						position: "absolute",
+						left: 0,
+						top: "45px",
+						background: "white",
+						borderRadius: "10px",
+						boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+						padding: "10px",
+						zIndex: 1000,
+						minWidth: "180px"
+					}}>
 
 					<button 
 						className="dropdown-item"

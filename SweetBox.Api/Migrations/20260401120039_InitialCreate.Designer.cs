@@ -12,7 +12,7 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    [Migration("20260326232423_InitialCreate")]
+    [Migration("20260401120039_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -314,7 +314,7 @@ namespace SweetBox.Api.Migrations
             modelBuilder.Entity("PedidoItem", b =>
                 {
                     b.HasOne("SweetBox.Api.Models.Pedido", "Pedido")
-                        .WithMany()
+                        .WithMany("PedidoItens")
                         .HasForeignKey("IdPedido")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -420,6 +420,8 @@ namespace SweetBox.Api.Migrations
             modelBuilder.Entity("SweetBox.Api.Models.Pedido", b =>
                 {
                     b.Navigation("Pagamento");
+
+                    b.Navigation("PedidoItens");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Produto", b =>

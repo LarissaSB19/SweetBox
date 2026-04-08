@@ -9,7 +9,6 @@ export default function GerenciarPedidos() {
   const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     carregarPedidos();
   }, []);
