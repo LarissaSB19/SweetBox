@@ -62,34 +62,20 @@ export default function Home() {
 
 
 	return (
-		<div>
+		<div style={styles.container}>
 			<div style={{ position: "absolute", top: "20px", left: "20px" }}>
 				{usuario ? (
 					<div style={{ position: "relative" }}>
 
-						<button 
-						className="btn btn-sm botao"
-						onClick={() => setMenuAberto(!menuAberto)}
-						style={{ fontSize: "20px" }}
-						>
-						☰
+						<button onClick={toggleMenu} style={styles.menuButton}>
+							☰
 						</button>
 
 						{menuAberto && (
-							<div style={{
-								position: "absolute",
-								left: 0,
-								top: "45px",
-								background: "white",
-								borderRadius: "10px",
-								boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-								padding: "10px",
-								zIndex: 1000,
-								minWidth: "180px"
-							}}>
-								<button 
-									className="dropdown-item"
-									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+							<div style={styles.dropdown}>
+
+								<button
+									style={styles.itemDropdown}
 									onClick={() => {
 										setMenuAberto(false);
 										irParaPerfil();
@@ -99,19 +85,18 @@ export default function Home() {
 								</button>
 
 								<button
-									className="dropdown-item"
-									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+									style={styles.itemDropdown}
 									onClick={() => {
-									setMenuAberto(false);
-									irParaMeusPedidos(); }}>
-
+										setMenuAberto(false);
+										irParaMeusPedidos();
+									}}
+								>
 									📦 Meus Pedidos
 								</button>
 
 								{perfil < 3 && (
-									<button 
-										className="dropdown-item"
-										style={{ padding: "10px", width: "100%", textAlign: "left" }}
+									<button
+										style={styles.itemDropdown}
 										onClick={() => {
 											setMenuAberto(false);
 											irParaAdmin();
@@ -121,18 +106,18 @@ export default function Home() {
 									</button>
 								)}
 
-								<hr style={{ margin: "8px 0" }} />
+								<hr style={styles.divider} />
 
-								<button 
-									className="dropdown-item text-danger"
-									style={{ padding: "10px", width: "100%", textAlign: "left" }}
+								<button
+									style={{ ...styles.itemDropdown, color: "#dc3545" }}
 									onClick={() => {
 										setMenuAberto(false);
 										irParaSair();
 									}}
 								>
-									Sair
+									🚪 Sair
 								</button>
+
 							</div>
 						)}
 					</div>
@@ -155,7 +140,9 @@ export default function Home() {
 					</div>
 
 					<div className="botoes row">
-						<div className="col-lg-6"><button onClick={irParaPedido} className="botao-inicio">Faça seu Pedido</button></div>
+						<div className="col-lg-6">
+							<button onClick={irParaPedido} className="botao-inicio">Faça seu Pedido</button>
+						</div>
 					</div>
 				</div>
 				<div className="col-lg-7 p-0 fundo-rosa">
@@ -200,3 +187,46 @@ export default function Home() {
 		</div>
 	);
 }
+
+const styles = {
+
+    menuButton: {
+        fontSize: "20px",
+        background: "#ccac99",
+        color: "#fff",
+        border: "none",
+        padding: "8px 12px",
+        borderRadius: "10px",
+        cursor: "pointer",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+    },
+
+    dropdown: {
+        position: "absolute",
+        top: "45px",
+        left: 0,
+        background: "#fff",
+        borderRadius: "12px",
+        padding: "10px",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+        minWidth: "200px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "5px",
+    },
+
+    itemDropdown: {
+        padding: "10px",
+        border: "none",
+        background: "transparent",
+        textAlign: "left",
+        cursor: "pointer",
+        borderRadius: "8px",
+        fontSize: "14px",
+    },
+
+    divider: {
+        margin: "8px 0",
+        borderColor: "#eee",
+    }
+};

@@ -60,7 +60,7 @@ export default function GerenciarPedidos() {
 
   return (
     <div style={container}>
-        <button type="button" id="btnVoltar" className="btn btn-sm" style={{backgroundColor: "#ccac99"}} onClick={() => navigate(-1)}>Voltar</button>
+      <button type="button" id="btnVoltar" className="btn btn-sm" style={{backgroundColor: "#ccac99"}} onClick={() => navigate(-1)}>Voltar</button>
         <h1 style={titulo}>📦 Gerenciamento de Pedidos</h1>
 
         <div style={filtroBox}>
@@ -213,7 +213,7 @@ export default function GerenciarPedidos() {
 const container = {
   padding: "30px",
   fontFamily: "'Segoe UI', sans-serif",
-  background: "linear-gradient(135deg, #fdfbfb, #ebedee)",
+  background: "#f7eee7",
   minHeight: "100vh"
 };
 

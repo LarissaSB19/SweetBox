@@ -10,6 +10,7 @@ import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import Perfil from './pages/Perfil';
 import GerenciarPedidos from "./pages/GerenciarPedidos";
 import MeusPedidos from "./pages/MeusPedidos";
+import FinalizacaoPedido from "./pages/FinalizacaoPedido";
 
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
 			<Route path="/perfil" element={<Perfil />} />
 			<Route path="/gerenciarPedidos" element={<GerenciarPedidos/>} />
 			<Route path="/meusPedidos" element={<MeusPedidos/>} />
+			<Route path="/FinalizacaoPedido" element={<FinalizacaoPedido/>} />
 		</Routes>
 		</BrowserRouter>
 	);

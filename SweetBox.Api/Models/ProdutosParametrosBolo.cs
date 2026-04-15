@@ -12,7 +12,7 @@ namespace SweetBox.Api.Models
         public string TipoParametro { get; set; } = string.Empty;
         public string NomeParametro { get; set; } = string.Empty; 
         public string DescParametro { get; set; } = string.Empty;
-        public float Multiplicador { get; set; }
+        public float Mutiplicador { get; set; }
 
         public int IdProduto { get; set; }
         public Produto? Produto { get; set; }

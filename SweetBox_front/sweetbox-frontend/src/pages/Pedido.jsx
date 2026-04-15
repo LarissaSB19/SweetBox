@@ -74,69 +74,44 @@ export default function Pedidos() {
     });
   }
 
-  async function finalizarPedido() {
-    const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+  function finalizarPedido() {
 
-    if (!usuario) {
-      alert("Faça login primeiro!");
-      return;
-    }
+  const usuario = JSON.parse(sessionStorage.getItem("usuario"));
 
-    const idUsuario = usuario;
-
-    if (!idUsuario) {
-      alert("Erro: usuário inválido. Faça login novamente.");
-      return;
-    }
-
-    if (carrinho.length === 0) {
-      alert("Carrinho vazio!");
-      return;
-    }
-
-    const total = carrinho.reduce(
-      (t, i) => t + (i.precoTotal || i.precoUnitario),
-      0
-    );
-
-    const pedido = {
-      idCliente: usuario.idUsuario,
-      itens: carrinho.map(item => ({
-        idProduto: item.idProduto,
-        quantidade: item.quantidade,
-        precoUnitario: item.precoTotal || item.precoUnitario,
-        parametrosBolo: (item.parametrosBolo || []).map(p => ({
-          idParametro: p.idParametro,
-          valorEscolhido: p.valorEscolhido,
-          quantidade: p.quantidade || 0
-        }))
-      }))
-    };
-
-    try {
-      const resp = await fetch("http://localhost:5179/api/Pedido", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(pedido),
-      });
-
-      if (!resp.ok) {
-        const erro = await resp.text();
-        console.error("ERRO BACKEND:", erro);
-        alert(erro);
-        return;
-      }
-
-      alert("Pedido enviado com sucesso!");
-      setCarrinho([]);
-
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao enviar pedido!");
-    }
+  if (!usuario) {
+    alert("Faça login primeiro!");
+    return;
   }
+
+  if (carrinho.length === 0) {
+    alert("Carrinho vazio!");
+    return;
+  }
+
+  const total = carrinho.reduce(
+    (t, i) => t + (i.precoTotal || i.precoUnitario),
+    0
+  );
+
+  const pedido = {
+    idCliente: usuario.idUsuario,
+    itens: carrinho.map(item => ({
+      idProduto: item.idProduto,
+      quantidade: item.quantidade,
+      precoUnitario: item.precoTotal || item.precoUnitario,
+      parametrosBolo: (item.parametrosBolo || []).map(p => ({
+        idParametro: p.idParametro,
+        valorEscolhido: p.valorEscolhido,
+        quantidade: p.quantidade || 0
+      }))
+    })),
+    valorTotal: total
+  };
+
+  sessionStorage.setItem("pedido", JSON.stringify(pedido));
+
+  navigate("/finalizacaoPedido");
+}
 
   return (
 
@@ -193,31 +168,55 @@ export default function Pedidos() {
             )}
           </div>
         </div>
+
       {!produtoSelecionado && (
-        <button
-          onClick={() => setCarrinhoAberto(true)}
-          style={{
-            position: "fixed",
-            right: "20px",
-            bottom: "30px",
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            border: "none",
-            background: "#ccac99",
-            color: "#fff",
-            fontSize: "26px",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-            zIndex: 1000,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          🛒
-        </button>
-      )}
+    <div style={{ position: "fixed", right: "20px", bottom: "30px", zIndex: 1000 }}>
+      
+      <button
+        onClick={() => setCarrinhoAberto(true)}
+        style={{
+          width: "60px",
+          height: "60px",
+          borderRadius: "50%",
+          border: "none",
+          background: "#ccac99",
+          color: "#fff",
+          fontSize: "26px",
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+        }}
+      >
+        🛒
+
+        {carrinho.length > 0 && (
+          <span
+            style={{
+              position: "absolute",
+              top: "-5px",
+              right: "-5px",
+              background: "#e53935",
+              color: "#fff",
+              borderRadius: "50%",
+              fontSize: "12px",
+              width: "22px",
+              height: "22px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontWeight: "bold",
+            }}
+          >
+            {carrinho.length}
+          </span>
+        )}
+      </button>
+
+    </div>
+  )}
           {carrinhoAberto && (
             <div
               onClick={() => setCarrinhoAberto(false)}
@@ -341,7 +340,6 @@ export default function Pedidos() {
 
                   <button
                     style={{ ...buttonSecondary, marginTop: "10px" }}
-                    onClick={() => setCarrinho([])}
                   >
                     Limpar
                   </button>
@@ -865,8 +863,8 @@ function ModalPadrao({ produto, fechar, adicionarAoCarrinho }) {
   };
 
   return (
-    <div style={modalFundo}>
-      <div style={modalBox}>
+    <div style={modalFundo} onClick={fechar}>
+      <div style={modalBox} onClick={(e) => e.stopPropagation()}>
         
         <button style={fecharX} onClick={fechar}>✕</button>
 
@@ -997,11 +995,6 @@ const label = {
   fontWeight: "bold",
 };
 
-const input = {
-  padding: "10px",
-  borderRadius: "8px",
-  border: "1px solid #ccc",
-};
 
 const select = {
   padding: "10px",
@@ -1009,16 +1002,6 @@ const select = {
   border: "1px solid #ccc",
 };
 
-const botoes = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-};
-
-const carrinhoBox = {
-  marginTop: "30px",
-  textAlign: "center",
-};
 
 const button = {
   padding: "10px 15px",
@@ -1081,35 +1064,6 @@ const btnFechar = {
   transition: "0.2s",
 };
 
-const controleGrande = {
-  display: "flex",
-  alignItems: "center",
-  gap: "15px",
-};
-
-const botaoQtdGrande = {
-  width: "40px",
-  height: "40px",
-  borderRadius: "50%",
-  border: "none",
-  background: "#ccac99",
-  color: "#fff",
-  fontSize: "20px",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const inputQtd = {
-  width: "80px",
-  textAlign: "center",
-  fontSize: "18px",
-  borderRadius: "10px",
-  border: "1px solid #ccc",
-  padding: "5px",
-};
-
 const conteudoCentral = {
   display: "flex",
   flexDirection: "column",
@@ -1163,11 +1117,12 @@ const pagina = {
 };
 
 const botaoVoltar = {
+  color: "white",
   marginBottom: "20px",
   padding: "8px 14px",
   borderRadius: "10px",
   border: "none",
-  background: "#fff",
+  background: "#ccac99",
   boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   cursor: "pointer",
 };
