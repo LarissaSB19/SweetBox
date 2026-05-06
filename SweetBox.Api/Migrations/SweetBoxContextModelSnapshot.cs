@@ -36,6 +36,9 @@ namespace SweetBox.Api.Migrations
                     b.Property<int>("IdProduto")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PrecoTotal")
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<decimal>("PrecoUnitario")
                         .HasColumnType("decimal(65,30)");
 
@@ -148,12 +151,18 @@ namespace SweetBox.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPedido"));
 
+                    b.Property<DateTime>("DataEntrega")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("DataPedido")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FormaPagamento")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<TimeSpan>("HoraEntrega")
+                        .HasColumnType("time(6)");
 
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
@@ -253,7 +262,7 @@ namespace SweetBox.Api.Migrations
                     b.Property<int>("IdProduto")
                         .HasColumnType("int");
 
-                    b.Property<float>("Mutiplicador")
+                    b.Property<float>("Multiplicador")
                         .HasColumnType("float");
 
                     b.Property<string>("NomeParametro")

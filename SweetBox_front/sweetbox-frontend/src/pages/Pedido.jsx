@@ -97,6 +97,7 @@ export default function Pedidos() {
     idCliente: usuario.idUsuario,
     itens: carrinho.map(item => ({
       idProduto: item.idProduto,
+	  nomeProduto: item.nomeProduto,
       quantidade: item.quantidade,
       precoUnitario: item.precoTotal || item.precoUnitario,
       parametrosBolo: (item.parametrosBolo || []).map(p => ({
@@ -409,27 +410,19 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
   const recheios1 = parametros.filter((p) => p.tipoParametro === "Recheio1");
   const recheios2 = parametros.filter((p) => p.tipoParametro === "Recheio2");
 
-  function calcularPreco() {
-    let soma = 0;
+	function calcularPreco() {
+		let soma = 0;
 
-    Object.values(valores).forEach((v) => {
-      if (v?.mutiplicador) {
-        soma += Number(v.mutiplicador);
-      }
-    });
+		Object.values(valores).forEach((v) => {
+			soma += Number(v?.multiplicador || 0);
+		});
 
-    if (recheio1?.mutiplicador) {
-      soma += Number(recheio1.mutiplicador);
-    }
+		soma += Number(recheio1?.multiplicador || 0);
+		soma += Number(recheio2?.multiplicador || 0);
 
-    if (recheio2?.mutiplicador) {
-      soma += Number(recheio2.mutiplicador);
-    }
+		return produto.preco * soma;
+	}
 
-    if (soma === 0) return produto.preco;
-
-    return produto.preco * soma;
-  }
 
   const adicionar = () => {
     if (!valores.tamanho) {

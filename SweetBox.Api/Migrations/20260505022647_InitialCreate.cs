@@ -111,6 +111,8 @@ namespace SweetBox.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     FormaPagamento = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    DataEntrega = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    HoraEntrega = table.Column<TimeSpan>(type: "time(6)", nullable: false),
                     IdUsuario = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -237,7 +239,8 @@ namespace SweetBox.Api.Migrations
                     IdPedidoItem = table.Column<int>(type: "int", nullable: false),
                     IdParametro = table.Column<int>(type: "int", nullable: false),
                     ValorEscolhido = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Quantidade = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

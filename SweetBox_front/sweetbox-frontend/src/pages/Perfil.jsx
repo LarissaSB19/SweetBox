@@ -138,7 +138,12 @@ export default function Perfil() {
 					<h2 style={styles.titulo}>Meu Perfil</h2>
 
 					{!editando ? (
-						<button style={styles.btnPrimary} onClick={() => setEditando(true)}>
+						<button style={styles.btnPrimary} 
+							onClick={() => {
+								setDadosEditados(usuario);
+								setEditando(true);
+							}}
+						>
 							Editar
 						</button>
 						) : (

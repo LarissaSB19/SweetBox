@@ -4,8 +4,12 @@ import App from './App'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css'
 
+import { PedidoProvider } from './pages/PedidoContext'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<App />
-	</React.StrictMode>,
+		<PedidoProvider>
+			<App />
+		</PedidoProvider>
+	</React.StrictMode>
 )

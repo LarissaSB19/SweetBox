@@ -12,7 +12,7 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    [Migration("20260401120039_InitialCreate")]
+    [Migration("20260505022647_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -151,12 +151,18 @@ namespace SweetBox.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPedido"));
 
+                    b.Property<DateTime>("DataEntrega")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("DataPedido")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FormaPagamento")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<TimeSpan>("HoraEntrega")
+                        .HasColumnType("time(6)");
 
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
@@ -187,6 +193,9 @@ namespace SweetBox.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("IdPedidoItem")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantidade")
                         .HasColumnType("int");
 
                     b.Property<string>("ValorEscolhido")

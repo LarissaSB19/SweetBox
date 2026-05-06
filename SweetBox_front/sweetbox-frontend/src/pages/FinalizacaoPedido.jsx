@@ -20,31 +20,43 @@ export default function FinalizarPedido() {
         setPedido(pedidoSalvo);
     }, []);
 
+    useEffect(() => {
+        if (!horaEntrega) {
+            const horarios = gerarHorarios();
+            setHoraEntrega(horarios[0]);
+        }
+    }, []);
+
     const getMinDate = () => {
         const hoje = new Date();
         hoje.setDate(hoje.getDate() + 5);
         return hoje.toISOString().split("T")[0];
     };
 
-    const finalizarPedido = () => {
-        if (!dataEntrega || !horaEntrega) {
-            alert("Selecione data e horário!");
+    function finalizarPedido() {
+
+        if (!dataEntrega) {
+            alert("Selecione uma data!");
             return;
         }
 
-        const pedidoFinal = {
+        if (!horaEntrega) {
+            alert("Selecione um horário!");
+            return;
+        }
+
+        const pedidoAtualizado = {
             ...pedido,
-            dataEntrega,
-            horaEntrega
+            dataEntrega: dataEntrega,
+            horaEntrega: horaEntrega
         };
 
-        console.log("Pedido final:", pedidoFinal);
+        console.log("PEDIDO ATUALIZADO:", pedidoAtualizado);
 
-        sessionStorage.removeItem("pedido");
+        sessionStorage.setItem("pedido", JSON.stringify(pedidoAtualizado));
 
-        alert("Pedido finalizado com sucesso!");
-        navigate("/meusPedidos");
-    };
+        navigate("/pagamento");
+    }
 
     const cancelarPedido = () => {
         const confirmar = window.confirm("Deseja cancelar o pedido?");
@@ -53,6 +65,28 @@ export default function FinalizarPedido() {
 
         sessionStorage.removeItem("pedido");
         navigate("/");
+    };
+
+    const gerarHorarios = () => {
+        const horarios = [];
+        let hora = 7;
+        let minuto = 0;
+
+        while (hora < 20 || (hora === 20 && minuto === 0)) {
+            const h = String(hora).padStart(2, "0");
+            const m = String(minuto).padStart(2, "0");
+
+            horarios.push(`${h}:${m}`);
+
+            minuto += 30;
+
+            if (minuto === 60) {
+                minuto = 0;
+                hora++;
+            }
+        }
+
+        return horarios;
     };
 
     return (
@@ -81,7 +115,7 @@ export default function FinalizarPedido() {
                                 <span>{item.quantidade}x</span>
 
                                 <span>
-                                    R$ {Number(item.precoUnitario || item.precoTotal || 0).toFixed(2)}
+                                    R$ {Number(item.precoTotal || item.precoUnitario || 0).toFixed(2)}
                                 </span>
 
                             </div>
@@ -125,20 +159,24 @@ export default function FinalizarPedido() {
                     />
 
                     <label style={styles.label}>Horário</label>
-                    <input
-                        type="time"
-                        value={horaEntrega}
-                        min="07:00"
-                        max="20:00"
-                        step="1800"
-                        onChange={(e) => setHoraEntrega(e.target.value)}
-                        onKeyDown={(e) => e.preventDefault()}
-                        onFocus={(e) => e.target.showPicker && e.target.showPicker()}
-                        style={styles.input}
-                    />
+                    <div style={styles.horariosContainer}>
+                        {gerarHorarios().map((hora, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setHoraEntrega(hora)}
+                                style={{
+                                    ...styles.horarioBtn,
+                                    background: horaEntrega === hora ? "#c79081" : "#f3e5dc",
+                                    color: horaEntrega === hora ? "#fff" : "#5a3e36"
+                                }}
+                            >
+                                {hora}
+                            </button>
+                        ))}
+                    </div>
 
                     <button style={styles.botao} onClick={finalizarPedido}>
-                        ✅ Finalizar Pedido
+                        ✅ Ir para Pagamento
                     </button>
 
                     <button style={styles.botaoCancelar} onClick={cancelarPedido}>
@@ -274,5 +312,21 @@ const styles = {
         marginTop:"15px",
         fontSize:"18px",
         color:"#8b5a3c"
+    },
+
+    horariosContainer: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "10px",
+        marginTop: "10px"
+    },
+
+    horarioBtn: {
+        padding: "10px 14px",
+        borderRadius: "8px",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "600",
+        transition: "0.2s"
     }
 };

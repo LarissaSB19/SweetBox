@@ -211,19 +211,19 @@ function Cadastro() {
             />
 
             <button
-              type="submit"
-              style={{
-                width: "100%",
-                padding: "12px",
-                backgroundColor: "#ccac99",
-                border: "none",
-                color: "white",
-                fontWeight: "bold",
-                borderRadius: "10px",
-                cursor: "pointer"
-              }}
+				type="submit"
+				style={{
+					width: "100%",
+					padding: "12px",
+					backgroundColor: "#ccac99",
+					border: "none",
+					color: "white",
+					fontWeight: "bold",
+					borderRadius: "10px",
+					cursor: "pointer"
+              	}}
             >
-              Enviar
+              	Enviar
             </button>
 
             <div className="text-center mt-3">

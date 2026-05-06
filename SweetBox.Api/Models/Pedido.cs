@@ -12,6 +12,9 @@ namespace SweetBox.Api.Models
         public decimal ValorTotal { get; set; }
         public string StatusPedido { get; set; } = "Em Preparo";
         public string FormaPagamento { get; set; } = string.Empty;
+        public DateTime DataEntrega { get; set; }
+        public TimeSpan HoraEntrega { get; set; }
+
         public ICollection<PedidoItem> PedidoItens { get; set; } = new List<PedidoItem>();
 
         public int IdUsuario { get; set; }
