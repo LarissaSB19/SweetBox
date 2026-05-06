@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SweetBox.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class UpdateBanco : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -160,7 +160,7 @@ namespace SweetBox.Api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DescParametro = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Mutiplicador = table.Column<float>(type: "float", nullable: false),
+                    Multiplicador = table.Column<float>(type: "float", nullable: false),
                     IdProduto = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -210,6 +210,7 @@ namespace SweetBox.Api.Migrations
                     Quantidade = table.Column<int>(type: "int", nullable: false),
                     PrecoUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     IdPedido = table.Column<int>(type: "int", nullable: false),
+                    PrecoTotal = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     IdProduto = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
