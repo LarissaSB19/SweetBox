@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SweetBox.Data;
 
@@ -11,9 +12,11 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    partial class SweetBoxContextModelSnapshot : ModelSnapshot
+    [Migration("20260522213905_Updates")]
+    partial class Updates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,25 +111,6 @@ namespace SweetBox.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Estoques");
-                });
-
-            modelBuilder.Entity("SweetBox.Api.Models.HorarioBloqueado", b =>
-                {
-                    b.Property<int>("IdHorarioBloqueado")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdHorarioBloqueado"));
-
-                    b.Property<DateTime>("Data")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<TimeSpan>("Hora")
-                        .HasColumnType("time(6)");
-
-                    b.HasKey("IdHorarioBloqueado");
-
-                    b.ToTable("HorarioBloqueados");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Pagamento", b =>

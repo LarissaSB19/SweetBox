@@ -488,6 +488,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
 
         <label style={label}>Tamanho</label>
         <select
+          id="tamanho"
           style={select}
           onChange={(e) => {
             const param = tamanhos.find(
@@ -506,6 +507,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
 
         <label style={label}>Massa</label>
         <select
+          id="massa"
           style={select}
           onChange={(e) => {
             const param = massas.find(
@@ -526,6 +528,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
         <div style={conteudoModal}>
           {recheios1.map((r) => (
             <div
+              data-testid="recheio1"
               key={r.idParametro}
               style={{
                 ...linhaSabor,
@@ -547,6 +550,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
         <div style={conteudoModal}>
           {recheios2.map((r) => (
             <div
+              data-testid="recheio2"
               key={r.idParametro}
               style={{
                 ...linhaSabor,

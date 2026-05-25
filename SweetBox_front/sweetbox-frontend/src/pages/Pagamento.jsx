@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import QRCode from "react-qr-code";
 
 export default function Pagamento() {
 
@@ -7,9 +8,7 @@ export default function Pagamento() {
 
     const [pedido, setPedido] = useState(null);
     const [metodo, setMetodo] = useState("");
-    const [numeroCartao, setNumeroCartao] = useState("");
-    const [nomeCartao, setNomeCartao] = useState("");
-    const [cvv, setCvv] = useState("");
+    const [codigoPix, setCodigoPix] = useState("");
 
     useEffect(() => {
         const pedidoSalvo = JSON.parse(sessionStorage.getItem("pedido"));
@@ -32,21 +31,16 @@ export default function Pagamento() {
             return;
         }
 
-        if (metodo === "cartao") {
-            if (!numeroCartao || !nomeCartao || !cvv) {
-                alert("Preencha os dados do cartão!");
-                return;
-            }
-        }
-
         const pedidoFinal = {
             ...pedido,    
             dataEntrega: pedido.dataEntrega + "T00:00:00",
             horaEntrega: pedido.horaEntrega + ":00",
             pagamento: {
-                metodo: metodo === "cartao" ? "Cartão" : "PIX",
-                status: "Aprovado",
-                dataPagamento: new Date().toISOString()
+                metodo: metodo === "pix" ? "PIX" : "Pagar na retirada",
+                statusPagamento: metodo === "pix" ? "Aprovado" : "Pendente",
+                dataPagamento: metodo === "pix"
+                    ? new Date().toISOString()
+                    : null
             }
         };
 
@@ -63,7 +57,11 @@ export default function Pagamento() {
 
             const data = await response.json();
 
-            console.log("RESPOSTA BACK:", data);
+            console.log("RESPOSTA BACK:", JSON.stringify(data, null, 2));
+
+            if (!response.ok) {
+                throw new Error("Erro ao salvar pedido");
+            }
 
             if (!response.ok) {
                 throw new Error("Erro ao salvar pedido");
@@ -89,17 +87,17 @@ export default function Pagamento() {
         return `${dia}/${mes}/${ano}`;
     }
 
-    function formatarCartao(valor) {
-        return valor
-            .replace(/\D/g, "")
-            .slice(0, 16)
-            .replace(/(\d{4})(?=\d)/g, "$1 ");
-    }
+    function gerarPixFake() {
+        const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let codigo = "PIX-";
 
-    function formatarCVV(valor) {
-        return valor
-            .replace(/\D/g, "")
-            .slice(0, 3);
+        for (let i = 0; i < 40; i++) {
+            codigo += caracteres.charAt(
+                Math.floor(Math.random() * caracteres.length)
+            );
+        }
+
+        return codigo;
     }
 
     return (
@@ -169,52 +167,40 @@ export default function Pagamento() {
                         <button
                             style={{
                                 ...styles.opcaoBtn,
-                                background: metodo === "cartao" ? "#c79081" : "#f3e5dc"
+                                background: metodo === "retirada" ? "#c79081" : "#f3e5dc"
                             }}
-                            onClick={() => setMetodo("cartao")}
+                            onClick={() => setMetodo("retirada")}
                         >
-                            💳 Cartão
+                            💵 Pagar na retirada
                         </button>
 
                         <button
+                            id="btnPix"
                             style={{
                                 ...styles.opcaoBtn,
                                 background: metodo === "pix" ? "#c79081" : "#f3e5dc"
                             }}
-                            onClick={() => setMetodo("pix")}
+                            onClick={() => {
+                                setMetodo("pix");
+                                setCodigoPix(gerarPixFake());
+                            }}
                         >
                             📱 PIX
                         </button>
 
                     </div>
-
-                    <div style={{ flex: 1, overflowY: "auto" }}>
-                        {metodo === "cartao" && (
-                            <div>
-
-                                <input
-                                    placeholder="Número do cartão"
-                                    value={numeroCartao}
-                                    onChange={(e) => setNumeroCartao(formatarCartao(e.target.value))}
-                                    maxLength={19}
-                                    style={styles.input}
-                                />
-
-                                <input
-                                    placeholder="Nome no cartão"
-                                    value={nomeCartao}
-                                    onChange={(e) => setNomeCartao(e.target.value)}
-                                    style={styles.input}
-                                />
-
-                                <input
-                                    placeholder="CVV"
-                                    value={cvv}
-                                    onChange={(e) => setCvv(formatarCVV(e.target.value))}
-                                    maxLength={3}
-                                    style={styles.input}
-                                />
-
+                    <div style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}>
+                        {metodo === "retirada" && (
+                            <div style={styles.pixBox}>
+                                <h4 style={{ fontSize: "16px", color: "#5a3e36" }}>
+                                    O pagamento será realizado no momento da retirada do pedido.
+                                </h4>
                             </div>
                         )}
 
@@ -222,9 +208,16 @@ export default function Pagamento() {
                             <div style={styles.pixBox}>
                                 <p>Escaneie o QR Code para pagar:</p>
 
-                                <div style={styles.qrFake}>
-                                    QR CODE PIX
+                                <div style={styles.qrContainer}>
+                                    <QRCode
+                                        value={codigoPix}
+                                        size={180}
+                                    />
                                 </div>
+
+                                <p style={styles.codigoPix}>
+                                    {codigoPix}
+                                </p>
 
                                 <p style={{ fontSize: "12px", color: "#666" }}>
                                     (Simulação)
@@ -232,7 +225,9 @@ export default function Pagamento() {
                             </div>
                         )}
                     </div>
-                    <button style={styles.botao} onClick={finalizarPagamento}>
+                    <button 
+                        id="confirmarPagamento"
+                        style={styles.botao} onClick={finalizarPagamento}>
                         ✅ Confirmar Pagamento
                     </button>
 
@@ -401,6 +396,24 @@ const styles = {
 
     linhaSeparador: {
         borderBottom: "1px dashed #ccc",
+        marginTop: "10px"
+    },
+
+    qrContainer: {
+        background: "#fff",
+        padding: "15px",
+        borderRadius: "12px",
+        width: "fit-content",
+        margin: "15px auto",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+    },
+
+    codigoPix: {
+        fontSize: "11px",
+        wordBreak: "break-all",
+        background: "#f8f8f8",
+        padding: "10px",
+        borderRadius: "8px",
         marginTop: "10px"
     },
 };

@@ -13,6 +13,7 @@ import MeusPedidos from "./pages/MeusPedidos";
 import FinalizacaoPedido from "./pages/FinalizacaoPedido";
 import Pagamento from "./pages/Pagamento";
 import PedidoConfirmado from "./pages/PedidoConfirmado";
+import GerenciarDataHora from "./pages/GerenciarDataHora";
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
 			<Route path="/finalizacaoPedido" element={<FinalizacaoPedido/>} />
 			<Route path="/pagamento" element={<Pagamento/>} />
 			<Route path="/pedidoConfirmado" element={<PedidoConfirmado/>} />
+			<Route path="/gerenciarDataHora" element={<GerenciarDataHora/>} />
 		</Routes>
 		</BrowserRouter>
 	);

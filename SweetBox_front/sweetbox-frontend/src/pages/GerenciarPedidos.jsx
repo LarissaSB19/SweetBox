@@ -105,6 +105,19 @@ export default function GerenciarPedidos() {
                 <p><strong>Data:</strong> {new Date(p.dataPedido).toLocaleString()}</p>
                 <p><strong>Valor:</strong> R$ {p.valorTotal.toFixed(2)}</p>
                 <p><strong>Cliente:</strong> {p.usuario?.nome || "—"}</p>
+                <p>
+                  <strong>Data da Retirada:</strong>{" "}
+                  {p.dataEntrega
+                    ? new Date(p.dataEntrega).toLocaleDateString()
+                    : "Não informada"}
+                </p>
+
+                <p>
+                  <strong>Hora da Retirada:</strong>{" "}
+                  {p.horaEntrega
+                    ? p.horaEntrega.slice(0, 5)
+                    : "Não informada"}
+                </p>
 
                 <div style={acoesBox}>
                 <button
@@ -172,7 +185,21 @@ export default function GerenciarPedidos() {
                 <h2>Pedido #{pedidoSelecionado.idPedido}</h2>
                 <p><strong>Cliente:</strong> {pedidoSelecionado.usuario?.nome}</p>
                 <p><strong>Data:</strong> {new Date(pedidoSelecionado.dataPedido).toLocaleString()}</p>
+                <p>
+                  <strong>Data da Retirada:</strong>{" "}
+                  {pedidoSelecionado.dataEntrega
+                    ? new Date(pedidoSelecionado.dataEntrega).toLocaleDateString()
+                    : "Não informada"}
+                </p>
+
+                <p>
+                  <strong>Hora da Retirada:</strong>{" "}
+                  {pedidoSelecionado.horaEntrega
+                    ? pedidoSelecionado.horaEntrega.slice(0, 5)
+                    : "Não informada"}
+                </p>
                 <p><strong>Status:</strong> {pedidoSelecionado.statusPedido}</p>
+                <p><strong>Pagamento:</strong> {pedidoSelecionado.formaPagamento}</p>
 
                 <h3 style={{ marginTop: "15px" }}>🧾 Itens do pedido</h3>
 
