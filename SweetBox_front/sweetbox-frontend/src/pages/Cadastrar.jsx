@@ -14,15 +14,70 @@ function Cadastro() {
     senha: '',
     confirmarSenha: ''
   });
+  const [requisitosSenha, setRequisitosSenha] = useState({
+    tamanho: false,
+    maiuscula: false,
+    minuscula: false,
+    numero: false,
+    especial: false
+  });
+  const [senhaValida, setSenhaValida] = useState(true);
 
   
+  const formatCPF = (value) => {
+    value = value.replace(/\D/g, "");
+
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+    return value;
+  };
+
+  const formatTelefone = (value) => {
+    value = value.replace(/\D/g, "");
+
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+    value = value.replace(/(\d{5})(\d{4})$/, "$1-$2");
+
+    return value;
+  };
+
+  const analisarSenha = (senha) => {
+    setRequisitosSenha({
+      tamanho: senha.length >= 8,
+      maiuscula: /[A-Z]/.test(senha),
+      minuscula: /[a-z]/.test(senha),
+      numero: /\d/.test(senha),
+      especial: /[@$!%*?&.#_-]/.test(senha)
+    });
+  };
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'radio' ? e.target.id : value
-    });
+    const { name, value, type, id } = e.target;
+
+    let newValue = value;
+
+    if (name === "cpf") {
+      newValue = formatCPF(value);
+    } else if (name === "telefone") {
+      newValue = formatTelefone(value);
+    }
+
+    if (name === "senha") {
+      analisarSenha(value);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "radio" ? id : newValue
+    }));
+  };
+
+  const validarSenha = (senha) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
+
+    return regex.test(senha);
   };
 
   const handleSubmit = async (e) => {
@@ -30,6 +85,10 @@ function Cadastro() {
 
   if (formData.senha !== formData.confirmarSenha) {
     alert("As senhas não coincidem!");
+    return;
+  }
+  if (!validarSenha(formData.senha)) {
+    alert("A senha deve ter no mínimo 8 caracteres, incluindo maiúscula, minúscula, número e caractere especial.");
     return;
   }
 
@@ -130,10 +189,11 @@ function Cadastro() {
 
             <label style={{ fontWeight: "bold", color: "#4B2E2E" }}>CPF</label>
             <input
-              type="number"
+              type="text"
               name="cpf"
               value={formData.cpf}
               onChange={handleChange}
+              maxLength={14}
               required
               style={{
                 width: "100%",
@@ -165,9 +225,9 @@ function Cadastro() {
             <input
               type="tel"
               name="telefone"
-              placeholder="(99) 99999-9999"
               value={formData.telefone}
               onChange={handleChange}
+              maxLength={15}
               required
               style={{
                 width: "100%",
@@ -193,6 +253,51 @@ function Cadastro() {
                 border: "1px solid #c5a48a"
               }}
             />
+            <div style={{ marginBottom: "15px" }}>
+              <small style={{ color: "#4B2E2E", fontWeight: "bold" }}>
+                Requisitos da senha:
+              </small>
+
+              <ul style={{ listStyle: "none", paddingLeft: "5px", marginTop: "5px" }}>
+                <li style={{ color: requisitosSenha.tamanho ? "green" : "gray" }}>
+                  {requisitosSenha.tamanho ? "✔" : "✖"} Mínimo 8 caracteres
+                </li>
+                <li style={{ color: requisitosSenha.maiuscula ? "green" : "gray" }}>
+                  {requisitosSenha.maiuscula ? "✔" : "✖"} Letra maiúscula
+                </li>
+                <li style={{ color: requisitosSenha.minuscula ? "green" : "gray" }}>
+                  {requisitosSenha.minuscula ? "✔" : "✖"} Letra minúscula
+                </li>
+                <li style={{ color: requisitosSenha.numero ? "green" : "gray" }}>
+                  {requisitosSenha.numero ? "✔" : "✖"} Número
+                </li>
+                <li style={{ color: requisitosSenha.especial ? "green" : "gray" }}>
+                  {requisitosSenha.especial ? "✔" : "✖"} Caractere especial
+                </li>
+              </ul>
+            </div>
+
+            <div style={{
+              height: "8px",
+              borderRadius: "5px",
+              backgroundColor: "#ddd",
+              marginBottom: "15px"
+            }}>
+              <div style={{
+                height: "100%",
+                width: `${
+                  Object.values(requisitosSenha).filter(Boolean).length * 20
+                }%`,
+                backgroundColor:
+                  Object.values(requisitosSenha).filter(Boolean).length <= 2
+                    ? "red"
+                    : Object.values(requisitosSenha).filter(Boolean).length <= 4
+                    ? "orange"
+                    : "green",
+                borderRadius: "5px",
+                transition: "0.3s"
+              }} />
+            </div>
 
             <label style={{ fontWeight: "bold", color: "#4B2E2E" }}>Confirmar senha</label>
             <input

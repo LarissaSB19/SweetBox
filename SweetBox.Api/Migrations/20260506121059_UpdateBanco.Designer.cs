@@ -12,8 +12,8 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    [Migration("20260505030546_UpdateTablePedidoItem")]
-    partial class UpdateTablePedidoItem
+    [Migration("20260506121059_UpdateBanco")]
+    partial class UpdateBanco
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
