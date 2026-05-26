@@ -103,7 +103,9 @@ export default function GerenciarPedidos() {
                 </div>
 
                 <p><strong>Data:</strong> {new Date(p.dataPedido).toLocaleString()}</p>
-                <p><strong>Valor:</strong> R$ {p.valorTotal.toFixed(2)}</p>
+                <p>
+                  <strong>Valor:</strong> R$ {Number(p.valorTotal || 0).toFixed(2)}
+                </p>
                 <p><strong>Cliente:</strong> {p.usuario?.nome || "—"}</p>
                 <p>
                   <strong>Data da Retirada:</strong>{" "}
@@ -209,7 +211,7 @@ export default function GerenciarPedidos() {
                     <strong style={{ fontSize: "16px" }}>
                         {item.produto?.nomeProduto}
                     </strong>
-                    <span>R$ {item.precoUnitario.toFixed(2)}</span>
+                    <span>R$ {Number(item.precoUnitario || 0).toFixed(2)}</span>
                     </div>
                     <div style={{ fontSize: "13px", color: "#666", marginBottom: "5px" }}>
                     {item.quantidade}x
@@ -222,7 +224,9 @@ export default function GerenciarPedidos() {
                 </div>
                 ))}
 
-                <h3>Total: R$ {pedidoSelecionado.valorTotal.toFixed(2)}</h3>
+                <h3>
+                  Total: R$ {Number(pedidoSelecionado.valorTotal || 0).toFixed(2)}
+                </h3>
 
                 <button
                 onClick={() => setPedidoSelecionado(null)}
