@@ -44,7 +44,15 @@ public class PedidoController : ControllerBase
             var pedido = new Pedido
             {
                 IdUsuario = pedidoDto.IdCliente,
-                DataPedido = DateTime.Now
+                DataPedido = DateTime.Now,
+
+                ValorTotal = pedidoDto.ValorTotal,
+                DataEntrega = pedidoDto.DataEntrega,
+                HoraEntrega = pedidoDto.HoraEntrega,
+
+                FormaPagamento = pedidoDto.Pagamento != null
+                    ? pedidoDto.Pagamento.Metodo
+                    : ""
             };
 
             _context.Pedidos.Add(pedido);
@@ -60,31 +68,48 @@ public class PedidoController : ControllerBase
                     IdPedido = pedido.IdPedido,
                     IdProduto = itemDto.IdProduto,
                     Quantidade = itemDto.Quantidade,
-                    PrecoUnitario = itemDto.PrecoUnitario
+                    PrecoUnitario = itemDto.PrecoUnitario,
                 };
 
                 _context.PedidoItens.Add(item);
 
-                totalPedido += itemDto.PrecoUnitario;
+               
+                await _context.SaveChangesAsync();
 
-                if (itemDto.ParametrosBolo != null)
+                if (itemDto.ParametrosBolo != null && itemDto.ParametrosBolo.Any())
                 {
-                    foreach (var param in itemDto.ParametrosBolo)
+                    foreach (var parametroDto in itemDto.ParametrosBolo)
                     {
-                        var itemParametro = new PedidoItemParametroBolo
+                        var parametro = new PedidoItemParametroBolo
                         {
-                            PedidoItem = item,
-                            IdParametro = param.IdParametro,
-                            ValorEscolhido = param.ValorEscolhido,
-                            Quantidade = param.Quantidade
+                            IdPedidoItem = item.IdPedidoItem,
+                            IdParametro = parametroDto.IdParametro,
+                            ValorEscolhido = parametroDto.ValorEscolhido,
+                            Quantidade = parametroDto.Quantidade
                         };
 
-                        _context.PedidoItemParametroBolos.Add(itemParametro);
+                        _context.Set<PedidoItemParametroBolo>().Add(parametro);
                     }
                 }
+
+                totalPedido += itemDto.PrecoUnitario;
             }
 
             pedido.ValorTotal = totalPedido;
+
+            if (pedidoDto.Pagamento != null)
+            {
+                var pagamento = new Pagamento
+                {
+                    IdPedido = pedido.IdPedido,
+                    Metodo = pedidoDto.Pagamento.Metodo,
+                    Valor = totalPedido,
+                    StatusPagamento = pedidoDto.Pagamento.Status,
+                    DataPagamento = pedidoDto.Pagamento.DataPagamento ?? DateTime.Now
+                };
+
+                _context.Pagamentos.Add(pagamento);
+            }
 
             await _context.SaveChangesAsync();
 

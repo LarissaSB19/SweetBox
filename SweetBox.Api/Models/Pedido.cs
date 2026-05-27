@@ -10,7 +10,7 @@ namespace SweetBox.Api.Models
 
         public DateTime DataPedido { get; set; } = DateTime.Now;
         public decimal ValorTotal { get; set; }
-        public string StatusPedido { get; set; } = "Em Preparo";
+        public string StatusPedido { get; set; } = "Pendente";
         public string FormaPagamento { get; set; } = string.Empty;
         public DateTime DataEntrega { get; set; }
         public TimeSpan HoraEntrega { get; set; }

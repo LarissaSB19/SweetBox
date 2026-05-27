@@ -110,6 +110,25 @@ namespace SweetBox.Api.Migrations
                     b.ToTable("Estoques");
                 });
 
+            modelBuilder.Entity("SweetBox.Api.Models.HorarioBloqueado", b =>
+                {
+                    b.Property<int>("IdHorarioBloqueado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdHorarioBloqueado"));
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<TimeSpan>("Hora")
+                        .HasColumnType("time(6)");
+
+                    b.HasKey("IdHorarioBloqueado");
+
+                    b.ToTable("HorarioBloqueados");
+                });
+
             modelBuilder.Entity("SweetBox.Api.Models.Pagamento", b =>
                 {
                     b.Property<int>("IdPagamento")
@@ -118,7 +137,7 @@ namespace SweetBox.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPagamento"));
 
-                    b.Property<DateTime>("DataPagamento")
+                    b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("IdPedido")

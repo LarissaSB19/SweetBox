@@ -58,11 +58,15 @@ public class UsuarioController : ControllerBase
                 .Select(p => new {
                     p.IdPedido,
                     p.DataPedido,
+
+                    p.DataEntrega,
+                    p.HoraEntrega,
+
                     p.ValorTotal,
                     p.StatusPedido,
                     p.FormaPagamento,
 
-                    pedidoItens = p.PedidoItens.Select(i => new {
+                         pedidoItens = p.PedidoItens.Select(i => new {
                         produto = new
                         {
                             nomeProduto = i.Produto.NomeProduto

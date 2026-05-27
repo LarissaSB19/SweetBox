@@ -160,6 +160,13 @@ export default function Admin() {
 					>
 						Gerenciar Pedidos
 					</button>
+
+					<button 
+						onClick={() => navigate("/gerenciarDataHora")}
+						style={botao}
+					>
+						Gerenciar Data e Hora Disponíveis
+					</button>
 				
 				</div>
 			</div>

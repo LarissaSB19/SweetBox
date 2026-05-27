@@ -18,6 +18,7 @@ namespace SweetBox.Data
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<ProdutosParametrosBolo> ProdutosParametrosBolos { get; set; }
         public DbSet<PedidoItemParametroBolo> PedidoItemParametroBolos { get; set; }
+        public DbSet<HorarioBloqueado> HorarioBloqueados { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

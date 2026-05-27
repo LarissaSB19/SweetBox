@@ -8,6 +8,7 @@ export default function FinalizarPedido() {
     const [dataEntrega, setDataEntrega] = useState("");
     const [horaEntrega, setHoraEntrega] = useState("");
     const [pedido, setPedido] = useState(null);
+    const [horariosBloqueados, setHorariosBloqueados] = useState([]);
 
     useEffect(() => {
         const pedidoSalvo = JSON.parse(sessionStorage.getItem("pedido"));
@@ -20,12 +21,27 @@ export default function FinalizarPedido() {
         setPedido(pedidoSalvo);
     }, []);
 
+
     useEffect(() => {
-        if (!horaEntrega) {
-            const horarios = gerarHorarios();
-            setHoraEntrega(horarios[0]);
+        carregarHorariosBloqueados();
+        }, []);
+
+        async function carregarHorariosBloqueados() {
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:5179/api/HorarioBloqueado"
+                );
+
+                const data = await response.json();
+
+                setHorariosBloqueados(data);
+
+            } catch (erro) {
+                console.error(erro);
+            }
         }
-    }, []);
 
     const getMinDate = () => {
         const hoje = new Date();
@@ -41,7 +57,17 @@ export default function FinalizarPedido() {
         }
 
         if (!horaEntrega) {
-            alert("Selecione um horário!");
+            alert("Selecione um horário disponível!");
+            return;
+        }
+
+        if (horarioEstaBloqueado(horaEntrega)) {
+            alert("Esse horário está bloqueado!");
+            return;
+        }
+
+        if (diaEstaTotalmenteBloqueado()) {
+            alert("Esse dia está totalmente bloqueado!");
             return;
         }
 
@@ -53,7 +79,10 @@ export default function FinalizarPedido() {
 
         console.log("PEDIDO ATUALIZADO:", pedidoAtualizado);
 
-        sessionStorage.setItem("pedido", JSON.stringify(pedidoAtualizado));
+        sessionStorage.setItem(
+            "pedido",
+            JSON.stringify(pedidoAtualizado)
+        );
 
         navigate("/pagamento");
     }
@@ -88,6 +117,33 @@ export default function FinalizarPedido() {
 
         return horarios;
     };
+
+    function horarioEstaBloqueado(hora) {
+
+        if (!dataEntrega) return false;
+
+        return horariosBloqueados.some((item) => {
+
+            const dataBloqueada = item.data.split("T")[0];
+            const horaBloqueada = item.hora.substring(0, 5);
+
+            return (
+                dataBloqueada === dataEntrega &&
+                horaBloqueada === hora
+            );
+        });
+    }
+
+    function diaEstaTotalmenteBloqueado() {
+
+        if (!dataEntrega) return false;
+
+        const horarios = gerarHorarios();
+
+        return horarios.every((hora) =>
+            horarioEstaBloqueado(hora)
+        );
+    }
 
     return (
         <div style={styles.container}>
@@ -148,34 +204,129 @@ export default function FinalizarPedido() {
                     <h2 style={styles.subtitulo}>📅 Entrega</h2>
 
                     <label style={styles.label}>Data</label>
-                    <input
-                        type="date"
-                        value={dataEntrega}
-                        min={getMinDate()}
-                        onChange={(e) => setDataEntrega(e.target.value)}
-                        onKeyDown={(e) => e.preventDefault()}
-                        onFocus={(e) => e.target.showPicker && e.target.showPicker()}
-                        style={styles.input}
-                    />
+                        <input
+                            id="dataEntrega"
+                            type="date"
+                            value={dataEntrega}
+                            min={getMinDate()}
+                            onChange={(e) => {
+
+                                const novaData = e.target.value;
+
+                                setDataEntrega(novaData);
+
+                                setHoraEntrega("");
+
+                                setTimeout(() => {
+
+                                    const horarios = gerarHorarios();
+
+                                    const horarioLivre = horarios.find(
+                                        (hora) => !horarioEstaBloqueado(hora)
+                                    );
+
+                                    if (horarioLivre) {
+                                        setHoraEntrega(horarioLivre);
+                                    }
+
+                                }, 0);
+                            }}
+                            onKeyDown={(e) => e.preventDefault()}
+                            onFocus={(e) =>
+                                e.target.showPicker &&
+                                e.target.showPicker()
+                            }
+                            style={{
+                                ...styles.input,
+
+                                border: diaEstaTotalmenteBloqueado()
+                                    ? "2px solid #ff4d4d"
+                                    : "1px solid #ddd",
+
+                                background: diaEstaTotalmenteBloqueado()
+                                    ? "#ffe5e5"
+                                    : "#fff"
+                            }}
+                        />
+
+                        {diaEstaTotalmenteBloqueado() && (
+
+                            <p
+                                style={{
+                                    color: "#d9534f",
+                                    fontWeight: "600",
+                                    marginTop: "8px"
+                                }}
+                            >
+                                🚫 Este dia está totalmente bloqueado
+                            </p>
+
+                        )}
 
                     <label style={styles.label}>Horário</label>
                     <div style={styles.horariosContainer}>
-                        {gerarHorarios().map((hora, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setHoraEntrega(hora)}
-                                style={{
-                                    ...styles.horarioBtn,
-                                    background: horaEntrega === hora ? "#c79081" : "#f3e5dc",
-                                    color: horaEntrega === hora ? "#fff" : "#5a3e36"
-                                }}
-                            >
-                                {hora}
-                            </button>
-                        ))}
+
+                        {gerarHorarios().map((hora, index) => {
+
+                            const bloqueado = horarioEstaBloqueado(hora);
+
+                            return (
+
+                                <button
+                                    key={index}
+                                    disabled={bloqueado}
+                                    onClick={() => setHoraEntrega(hora)}
+                                    style={{
+                                        ...styles.horarioBtn,
+
+                                        background: bloqueado
+                                            ? "#d8d8d8"
+                                            : horaEntrega === hora
+                                                ? "#c79081"
+                                                : "#f3e5dc",
+
+                                        color: bloqueado
+                                            ? "#777"
+                                            : horaEntrega === hora
+                                                ? "#fff"
+                                                : "#5a3e36",
+
+                                        cursor: bloqueado
+                                            ? "not-allowed"
+                                            : "pointer",
+
+                                        opacity: bloqueado ? 0.6 : 1
+                                    }}
+                                >
+                                    {bloqueado
+                                        ? `${hora} 🚫`
+                                        : hora}
+                                </button>
+
+                            );
+                        })}
+
                     </div>
 
-                    <button style={styles.botao} onClick={finalizarPedido}>
+                    <button
+                        style={{
+                            ...styles.botao,
+
+                            opacity:
+                                diaEstaTotalmenteBloqueado()
+                                    ? 0.5
+                                    : 1,
+
+                            cursor:
+                                diaEstaTotalmenteBloqueado()
+                                    ? "not-allowed"
+                                    : "pointer"
+                        }}
+
+                        disabled={diaEstaTotalmenteBloqueado()}
+
+                        onClick={finalizarPedido}
+                    >
                         ✅ Ir para Pagamento
                     </button>
 

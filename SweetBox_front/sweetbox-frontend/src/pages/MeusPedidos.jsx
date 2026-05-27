@@ -100,6 +100,8 @@ export default function MeusPedidos() {
         const data = p.dataPedido ?? p.DataPedido;
         const itens = p.itens ?? p.pedidoItens ?? [];
         const valor = p.valorTotal ?? p.ValorTotal;
+        const dataEntrega = p.dataEntrega ?? p.DataEntrega;
+        const horaEntrega = p.horaEntrega ?? p.HoraEntrega;
     
         return(
 
@@ -300,8 +302,20 @@ export default function MeusPedidos() {
                         </p>
 
                         <p>
-                            <strong>Data:</strong>{" "}
+                            <strong>Data/Hora do Pedido:</strong>{" "}
                                 {new Date(pedidoSelecionado.dataPedido ?? pedidoSelecionado.DataPedido).toLocaleString()}
+                        </p>
+
+                        <p>
+                            <strong>📅 Data de Retirada:</strong>{" "}
+                            {new Date(
+                                pedidoSelecionado.dataEntrega ?? pedidoSelecionado.DataEntrega
+                            ).toLocaleDateString()}
+                        </p>
+
+                        <p>
+                            <strong>⏰ Hora da Retirada:</strong>{" "}
+                            {(pedidoSelecionado.horaEntrega ?? pedidoSelecionado.HoraEntrega)?.slice(0,5)}
                         </p>
 
                         <p>
