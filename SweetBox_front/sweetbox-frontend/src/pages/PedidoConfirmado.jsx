@@ -42,6 +42,7 @@ export default function PedidoConfirmado() {
                     <p><strong>📅 Data da retirada:</strong> {formatarDataBR(pedido?.dataEntrega)}</p>
                     <p><strong>⏰ Horário:</strong> {pedido?.horaEntrega}</p>
                     <p><strong>💳 Pagamento:</strong> {pedido?.pagamento?.metodo}</p>
+                    <p><strong>Local da retirada:</strong> Flavis Bolos e Doces (Localização na página principal)</p>
                 </div>
 
                 <div style={styles.divisor} />
