@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SweetBox.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateBanco : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,6 +27,21 @@ namespace SweetBox.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categorias", x => x.IdCategoria);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "HorarioBloqueados",
+                columns: table => new
+                {
+                    IdHorarioBloqueado = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Data = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Hora = table.Column<TimeSpan>(type: "time(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HorarioBloqueados", x => x.IdHorarioBloqueado);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -62,6 +77,8 @@ namespace SweetBox.Api.Migrations
                     Endereco = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Senha = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FirebaseUid = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IdPerfil = table.Column<int>(type: "int", nullable: false)
                 },
@@ -186,7 +203,7 @@ namespace SweetBox.Api.Migrations
                     Valor = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     StatusPagamento = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DataPagamento = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DataPagamento = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     IdPedido = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -314,6 +331,9 @@ namespace SweetBox.Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Estoques");
+
+            migrationBuilder.DropTable(
+                name: "HorarioBloqueados");
 
             migrationBuilder.DropTable(
                 name: "Pagamentos");

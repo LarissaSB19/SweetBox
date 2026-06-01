@@ -12,8 +12,8 @@ using SweetBox.Data;
 namespace SweetBox.Api.Migrations
 {
     [DbContext(typeof(SweetBoxContext))]
-    [Migration("20260522213905_Updates")]
-    partial class Updates
+    [Migration("20260601201338_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -111,6 +111,25 @@ namespace SweetBox.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Estoques");
+                });
+
+            modelBuilder.Entity("SweetBox.Api.Models.HorarioBloqueado", b =>
+                {
+                    b.Property<int>("IdHorarioBloqueado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdHorarioBloqueado"));
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<TimeSpan>("Hora")
+                        .HasColumnType("time(6)");
+
+                    b.HasKey("IdHorarioBloqueado");
+
+                    b.ToTable("HorarioBloqueados");
                 });
 
             modelBuilder.Entity("SweetBox.Api.Models.Pagamento", b =>
@@ -283,7 +302,7 @@ namespace SweetBox.Api.Migrations
                     b.ToTable("ProdutosParametrosBolos");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>
+            modelBuilder.Entity("Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
                         .ValueGeneratedOnAdd()
@@ -300,6 +319,10 @@ namespace SweetBox.Api.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Endereco")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirebaseUid")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -366,7 +389,7 @@ namespace SweetBox.Api.Migrations
 
             modelBuilder.Entity("SweetBox.Api.Models.Pedido", b =>
                 {
-                    b.HasOne("SweetBox.Api.Models.Usuario", "Usuario")
+                    b.HasOne("Usuario", "Usuario")
                         .WithMany("Pedidos")
                         .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -443,7 +466,7 @@ namespace SweetBox.Api.Migrations
                     b.Navigation("ProdutosParametrosBolo");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>
+            modelBuilder.Entity("Usuario", b =>
                 {
                     b.Navigation("Pedidos");
                 });

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 function Entrar() {
 	const navigate = useNavigate();
@@ -21,31 +23,50 @@ function Entrar() {
 		setErro('');
 
 		try {
-			const response = await fetch("http://localhost:5179/api/Usuario/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					email: formData.email,
-					senha: formData.senha
-				})
-			});
 
-			if (!response.ok) {
-				setErro("Email ou senha inválidos.");
-				return;
-			}
+    await signInWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.senha
+    );
 
-			const dados = await response.json();
+    const response = await fetch(
+      "http://localhost:5179/api/Usuario/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: formData.email
+        })
+      }
+    );
 
-			sessionStorage.setItem("usuario", JSON.stringify(dados));
-      sessionStorage.setItem("perfil", dados.idPerfil);
-      
-			navigate("/");
-		}
-		catch (error) {
-			console.error("Erro no login:", error);
-			setErro("Erro ao conectar com o servidor.");
-		}
+    if (!response.ok) {
+      setErro("Usuário não encontrado.");
+      return;
+    }
+
+    const dados = await response.json();
+
+    sessionStorage.setItem(
+      "usuario",
+      JSON.stringify(dados)
+    );
+
+    sessionStorage.setItem(
+      "perfil",
+      dados.idPerfil
+    );
+
+    navigate("/");
+
+  }
+  catch (error) {
+    console.error(error);
+    setErro("Email ou senha inválidos.");
+  }
 	};
 
 

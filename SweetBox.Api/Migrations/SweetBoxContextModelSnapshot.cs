@@ -299,7 +299,7 @@ namespace SweetBox.Api.Migrations
                     b.ToTable("ProdutosParametrosBolos");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>
+            modelBuilder.Entity("Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
                         .ValueGeneratedOnAdd()
@@ -316,6 +316,10 @@ namespace SweetBox.Api.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Endereco")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirebaseUid")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -382,7 +386,7 @@ namespace SweetBox.Api.Migrations
 
             modelBuilder.Entity("SweetBox.Api.Models.Pedido", b =>
                 {
-                    b.HasOne("SweetBox.Api.Models.Usuario", "Usuario")
+                    b.HasOne("Usuario", "Usuario")
                         .WithMany("Pedidos")
                         .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -459,7 +463,7 @@ namespace SweetBox.Api.Migrations
                     b.Navigation("ProdutosParametrosBolo");
                 });
 
-            modelBuilder.Entity("SweetBox.Api.Models.Usuario", b =>
+            modelBuilder.Entity("Usuario", b =>
                 {
                     b.Navigation("Pedidos");
                 });

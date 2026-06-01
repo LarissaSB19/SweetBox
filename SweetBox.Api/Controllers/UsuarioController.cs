@@ -18,13 +18,10 @@ public class UsuarioController : ControllerBase
     public async Task<ActionResult<Usuario>> Login(LoginRequest request)
     {
         var usuario = await _context.Usuarios
-
-            .FirstOrDefaultAsync(u =>
-                u.Email == request.Email &&
-                u.Senha == request.Senha);
+            .FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (usuario == null)
-            return Unauthorized(new { mensagem = "Email ou senha inválidos." });
+            return Unauthorized(new { mensagem = "Usuário não encontrado." });
 
         return Ok(usuario);
     }

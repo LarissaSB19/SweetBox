@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 function Cadastro() {
   const navigate = useNavigate();
@@ -102,6 +104,23 @@ function Cadastro() {
   };
 
   try {
+
+    const firebaseUser = await createUserWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.senha
+    );
+
+    const payload = {
+      nome: formData.nome,
+      email: formData.email,
+      cpf: String(formData.cpf),
+      endereco: formData.endereco,
+      telefone: formData.telefone,
+      senha: "",
+      firebaseUid: firebaseUser.user.uid
+    };
+
     const response = await fetch("http://localhost:5179/api/Usuario", {
       method: "POST",
       headers: {
@@ -111,17 +130,16 @@ function Cadastro() {
     });
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error("Resposta do servidor:", response.status, text);
-      alert(`Erro ao cadastrar: ${response.status} - ${text || "Sem mensagem do servidor"}`);
-      return;
+      throw new Error("Erro ao salvar usuário");
     }
 
     alert("Usuário cadastrado com sucesso!");
     navigate("/Entrar");
-  } catch (err) {
-    console.error("Erro ao conectar:", err);
-    alert("Erro ao conectar com o servidor. Veja o console para detalhes.");
+
+  }
+  catch (err) {
+    console.error(err);
+    alert("Erro ao cadastrar usuário.");
   }
 };
 

@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 function RecuperarSenha() {
 	const navigate = useNavigate();
-	const [formData, setFormData] = useState({
-		emailR: '',
-		rSenha: ''
-	});
+	const [emailR, setEmailR] = useState("");
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData(prev => ({ ...prev, [name]: value }));
-	};
+	const handleSubmit = async (e) => {
+	e.preventDefault();
 
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		console.log('Recuperação enviada:', formData);
-		navigate('/Entrar');
+	try {
+		await sendPasswordResetEmail(auth, emailR);
+
+		alert(
+		"E-mail de recuperação enviado! Verifique sua caixa de entrada."
+		);
+
+		navigate("/Entrar");
+	} catch (error) {
+		console.error(error);
+
+		if (error.code === "auth/user-not-found") {
+		alert("Nenhum usuário encontrado com este e-mail.");
+		} else {
+		alert("Erro ao enviar e-mail de recuperação.");
+		}
+	}
 	};
 
 	return (
@@ -56,29 +66,13 @@ function RecuperarSenha() {
 						<input
 							type="email"
 							name="emailR"
-							value={formData.emailR}
-							onChange={handleChange}
+							value={emailR}
+							onChange={(e) => setEmailR(e.target.value)}
 							required
 							style={{
 								width: "100%",
 								padding: "10px",
 								marginBottom: "15px",
-								borderRadius: "8px",
-								border: "1px solid #c5a48a"
-							}}
-						/>
-
-						<label style={{ fontWeight: "bold", color: "#4B2E2E" }}>Nova Senha</label>
-						<input
-							type="password"
-							name="rSenha"
-							value={formData.rSenha}
-							onChange={handleChange}
-							required
-							style={{
-								width: "100%",
-								padding: "10px",
-								marginBottom: "25px",
 								borderRadius: "8px",
 								border: "1px solid #c5a48a"
 							}}
