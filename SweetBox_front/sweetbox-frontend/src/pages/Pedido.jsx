@@ -370,6 +370,7 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
   const [valores, setValores] = useState({});
   const [recheio1, setRecheio1] = useState(null);
   const [recheio2, setRecheio2] = useState(null);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     if (produto.itemEditando) {
@@ -425,25 +426,19 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
 
 
   const adicionar = () => {
-    if (!valores.tamanho) {
-      alert("Selecione o tamanho do bolo!");
+    if (
+      !valores.tamanho ||
+      !valores.massa ||
+      !recheio1 ||
+      !recheio2
+    ) {
+      setErro(
+        "Selecione todas as opções obrigatórias antes de adicionar o produto ao pedido."
+      );
       return;
     }
 
-    if (!valores.massa) {
-      alert("Selecione a massa!");
-      return;
-    }
-
-    if (!recheio1) {
-      alert("Selecione o recheio 1!");
-      return;
-    }
-
-    if (!recheio2) {
-      alert("Selecione o recheio 2!");
-      return;
-    }
+    setErro("");
     const params = [];
 
     Object.values(valores).forEach((p) => {
@@ -571,6 +566,22 @@ function ModalDinamico({ produto, fechar, adicionarAoCarrinho }) {
         <h3 style={{ marginTop: "15px" }}>
           Total: R$ {calcularPreco().toFixed(2)}
         </h3>
+
+        {erro && (
+          <div
+            style={{
+              background: "#ffebee",
+              color: "#c62828",
+              padding: "10px",
+              borderRadius: "8px",
+              marginTop: "10px",
+              textAlign: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {erro}
+          </div>
+        )}
 
         <div style={footerModal}>
           <button style={button} onClick={adicionar}>

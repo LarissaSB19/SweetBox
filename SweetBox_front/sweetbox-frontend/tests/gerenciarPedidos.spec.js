@@ -26,8 +26,9 @@ test.describe('Gerenciamento de Pedidos - SweetBox', () => {
         // Filtrar pedidos pendentes
         await page.locator('select').selectOption('Pendente');
 
-        // Atualizar lista
-        await page.getByRole('button', { name: 'Atualizar' }).click();
+
+        // Aguarda a atualização da lista
+        await page.waitForTimeout(500);
 
         // Evidência 2
         await page.screenshot({
@@ -35,14 +36,13 @@ test.describe('Gerenciamento de Pedidos - SweetBox', () => {
             fullPage: true
         });
 
-        // Abrir detalhes
-        await page.getByRole('button', { name: 'Ver detalhes' })
-            .first()
-            .click();
+        await page.getByText('Ver detalhes')
+        .first()
+        .click();
 
         // Validar modal
         await expect(
-            page.getByText('Itens do pedido')
+            page.getByText(/Itens do pedido/i)
         ).toBeVisible();
 
         // Evidência 3
@@ -66,9 +66,9 @@ test.describe('Gerenciamento de Pedidos - SweetBox', () => {
 
         // Validar alteração
         await expect(
-        page.locator('span, td, div').filter({
-            hasText: 'Em Preparo'
-        }).first()
+            page.locator('span, td, div')
+                .filter({ hasText: 'Em Preparo' })
+                .first()
         ).toBeVisible();
 
         // Evidência 4
@@ -76,6 +76,44 @@ test.describe('Gerenciamento de Pedidos - SweetBox', () => {
             path: 'evidencias/04-status-alterado.png',
             fullPage: true
         });
+
+    });
+
+    test('Pesquisar pedido inexistente', async ({ page }) => {
+
+        // Abrir página
+        await page.goto('http://localhost:5173/gerenciarPedidos');
+
+        // Evidência 5
+        await page.screenshot({
+            path: 'evidencias/05-tela-inicial-erro.png',
+            fullPage: true
+        });
+
+        // Validar título
+        await expect(
+            page.getByText('Gerenciamento de Pedidos')
+        ).toBeVisible();
+
+        // Pesquisar cliente inexistente
+        await page.getByPlaceholder('🔍 Cliente')
+            .fill('Carlos Souza');
+
+        // Validar mensagem de erro
+        await expect(
+            page.getByText('Pedido não encontrado.')
+        ).toBeVisible();
+
+        // Evidência 6
+        await page.screenshot({
+            path: 'evidencias/06-pedido-nao-encontrado.png',
+            fullPage: true
+        });
+
+        // Garantir que nenhum pedido está sendo exibido
+        await expect(
+            page.locator('text=Pedido #')
+        ).toHaveCount(0);
 
     });
 

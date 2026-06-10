@@ -8,6 +8,8 @@ export default function GerenciarProdutos() {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(false);
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -34,6 +36,8 @@ export default function GerenciarProdutos() {
   }
 
   const abrirModalCriar = () => {
+    setErro("");
+    setSucesso("");
     setEditando(false);
     setForm({ nomeProduto: "", preco: "", descricao: "", imagem: "", idCategoria: 1, idEstoque: 1 });
     setModalAberto(true);
@@ -68,6 +72,14 @@ export default function GerenciarProdutos() {
   const salvarProduto = async (e) => {
     e.preventDefault();
 
+    if (!form.nomeProduto || !form.preco || !form.descricao) {
+      setErro("Preencha todos os campos obrigatórios.");
+      setSucesso("");
+      return;
+    }
+
+    setErro("");
+
     const metodo = editando ? "PUT" : "POST";
     const url = editando ? `${API_URL}/${produtoEditandoId}` : API_URL;
 
@@ -90,6 +102,13 @@ export default function GerenciarProdutos() {
 
       carregarProdutos();
       fecharModal();
+
+      setSucesso(
+        editando
+          ? "Produto atualizado com sucesso."
+          : "Produto cadastrado."
+      );
+
     } catch (err) {
       console.error("Erro ao salvar:", err);
     }
@@ -111,6 +130,22 @@ export default function GerenciarProdutos() {
       <div style={{ padding: "30px", textAlign: "center" }}>
  
         <h1>Gerenciamento dos Produtos</h1>
+
+        {sucesso && (
+          <div
+            style={{
+              background: "#e8f5e9",
+              color: "#2e7d32",
+              padding: "10px",
+              borderRadius: "8px",
+              width: "fit-content",
+              margin: "15px auto",
+              fontWeight: "bold"
+            }}
+          >
+            {sucesso}
+          </div>
+        )}
 
         <button style={btnCadastrar} onClick={abrirModalCriar}>
           Cadastrar Produto
@@ -179,6 +214,23 @@ export default function GerenciarProdutos() {
               <h2>{editando ? "Editar Produto" : "Cadastrar Produto"}</h2>
 
               <form onSubmit={salvarProduto} style={{ textAlign: "left" }}>
+
+                {erro && (
+                  <div
+                    style={{
+                      background: "#ffebee",
+                      color: "#c62828",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      marginBottom: "15px",
+                      textAlign: "center",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {erro}
+                  </div>
+                )}
+              
                 <label>Nome:</label>
                 <input
                   type="text"
@@ -186,7 +238,7 @@ export default function GerenciarProdutos() {
                   value={form.nomeProduto}
                   onChange={handleChange}
                   style={inputStyle}
-                  required
+                  
                 />
 
                 <label>Preço:</label>
@@ -196,7 +248,7 @@ export default function GerenciarProdutos() {
                   value={form.preco}
                   onChange={handleChange}
                   style={inputStyle}
-                  required
+                  
                 />
 
                 <label>Descrição:</label>

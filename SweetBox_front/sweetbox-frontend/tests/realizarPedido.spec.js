@@ -141,5 +141,76 @@ test.describe('Fluxo Completo de Pedido SweetBox', () => {
     console.log('Pagamento via PIX confirmado.');
 
   });
+  
+  test('Tentar adicionar produto sem preencher todos os campos obrigatórios', async ({ page }) => {
+
+  // LOGIN FAKE
+  await page.addInitScript(() => {
+
+    sessionStorage.setItem(
+      'usuario',
+      JSON.stringify({
+        idUsuario: 1,
+        nome: 'Larissa',
+        email: 'lissa@gmail.com',
+        idPerfil: 1
+      })
+    );
+
+    sessionStorage.setItem('token', 'token-fake');
+    sessionStorage.setItem('isAuthenticated', 'true');
+
+  });
+
+  // ABRIR PÁGINA
+  await page.goto('http://localhost:5173/pedido');
+
+  await page.waitForLoadState('domcontentloaded');
+
+  // Validar tela
+  await expect(
+    page.getByText('Monte seu Pedido')
+  ).toBeVisible();
+
+  // Evidência 6
+  await page.screenshot({
+    path: 'evidencias/06-pagina-pedidos-erro.png',
+    fullPage: true
+  });
+
+  // Abrir produto
+  await page.locator('.card-hover').first().click();
+
+  // Selecionar apenas tamanho e massa
+  await page.selectOption('#tamanho', { index: 1 });
+  await page.selectOption('#massa', { index: 1 });
+
+  // NÃO selecionar recheios
+
+  // Evidência 7
+  await page.screenshot({
+    path: 'evidencias/07-campos-incompletos.png',
+    fullPage: true
+  });
+
+  // Tentar adicionar
+  await page.getByText('Adicionar').click();
+
+  // Validar mensagem de erro
+  await expect(
+    page.getByText(
+      'Selecione todas as opções obrigatórias antes de adicionar o produto ao pedido.'
+    )
+  ).toBeVisible();
+
+  // Evidência 8
+  await page.screenshot({
+    path: 'evidencias/08-validacao-campos-obrigatorios.png',
+    fullPage: true
+  });
+
+  console.log('Validação de campos obrigatórios executada com sucesso.');
+
+});
 
 });

@@ -6,6 +6,8 @@ const API_URL = "http://localhost:5179/api/Pedido";
 export default function GerenciarPedidos() {
   const [pedidos, setPedidos] = useState([]);
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [buscaCliente, setBuscaCliente] = useState("");
+  const [filtroData, setFiltroData] = useState("");  
   const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
   const navigate = useNavigate();
 
@@ -54,47 +56,127 @@ export default function GerenciarPedidos() {
     }
   }
 
-  const pedidosFiltrados = filtroStatus
-    ? pedidos.filter(p => p.statusPedido === filtroStatus)
-    : pedidos;
+  const pedidosFiltrados = pedidos.filter((p) => {
+
+    const clienteOk =
+      !buscaCliente ||
+      p.usuario?.nome
+        ?.toLowerCase()
+        .includes(buscaCliente.toLowerCase());
+
+    const statusOk =
+      !filtroStatus ||
+      p.statusPedido === filtroStatus;
+
+    const dataOk =
+      !filtroData ||
+      (
+        p.dataEntrega &&
+        new Date(p.dataEntrega)
+          .toISOString()
+          .split("T")[0] === filtroData
+      );
+
+    return clienteOk && statusOk && dataOk;
+  });
+    
 
   return (
     <div style={container}>
       <button type="button" id="btnVoltar" className="btn btn-sm" style={{backgroundColor: "#ccac99"}} onClick={() => navigate(-1)}>Voltar</button>
         <h1 style={titulo}>📦 Gerenciamento de Pedidos</h1>
 
+        <div style={resumoContainer}>
+          <div style={cardResumo}>
+            <h3>{pedidos.filter(p => p.statusPedido === "Pendente").length}</h3>
+            <p>Pendentes</p>
+          </div>
+
+          <div style={cardResumo}>
+            <h3>{pedidos.filter(p => p.statusPedido === "Em Preparo").length}</h3>
+            <p>Em Preparo</p>
+          </div>
+
+          <div style={cardResumo}>
+            <h3>{pedidos.filter(p => p.statusPedido === "Finalizado").length}</h3>
+            <p>Finalizados</p>
+          </div>
+
+          <div style={cardResumo}>
+            <h3>{pedidos.filter(p => p.statusPedido === "Cancelado").length}</h3>
+            <p>Cancelados</p>
+          </div>
+        </div>
+
         <div style={filtroBox}>
-            <select
+
+          <input
+            type="text"
+            placeholder="🔍 Cliente"
+            value={buscaCliente}
+            onChange={(e) => setBuscaCliente(e.target.value)}
+            style={inputStyle}
+          />
+
+          <input
+            type="date"
+            value={filtroData}
+            onChange={(e) => setFiltroData(e.target.value)}
+            style={inputStyle}
+          />
+
+          <select
             value={filtroStatus}
             onChange={(e) => setFiltroStatus(e.target.value)}
             style={inputStyle}
-            >
+          >
             <option value="">Todos</option>
             <option value="Pendente">Pendente</option>
             <option value="Em Preparo">Em Preparo</option>
             <option value="Finalizado">Finalizado</option>
             <option value="Cancelado">Cancelado</option>
-            </select>
+          </select>
 
-            <button onClick={carregarPedidos} style={btnAtualizar}>
-            Atualizar
-            </button>
+          <button
+            onClick={() => {
+              setBuscaCliente("");
+              setFiltroStatus("");
+              setFiltroData("");
+            }}
+            style={btnAtualizar}
+          >
+            Limpar Filtros
+          </button>
+
         </div>
 
         <div style={gridPedidos}>
-            {pedidosFiltrados.map((p) => (
-            <div
-              key={p.idPedido}
-              style={cardPedido}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-5px)";
-                e.currentTarget.style.boxShadow = "0 12px 25px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.08)";
+          {pedidosFiltrados.length === 0 ? (
+            <p
+              style={{
+                gridColumn: "1 / -1",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: "18px"
               }}
             >
+              Pedido não encontrado.
+            </p>
+          ) : (
+            pedidosFiltrados.map((p) => (
+              <div
+                key={p.idPedido}
+                style={cardPedido}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow = "0 12px 25px rgba(0,0,0,0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.08)";
+                }}
+              >
+
                 <div style={cardHeader}>
                   <strong>Pedido #{p.idPedido}</strong>
                   <span style={getStatusStyle(p.statusPedido)}>
@@ -178,8 +260,10 @@ export default function GerenciarPedidos() {
                 Ver detalhes
                 </button>
             </div>
-            ))}
+            ))
+          )}
         </div>
+
 
         {pedidoSelecionado && (
             <div style={modalBackground} onClick={() => setPedidoSelecionado(null)}>
@@ -254,6 +338,21 @@ const titulo = {
   color: "#5a3e36",
   fontSize: "28px",
   fontWeight: "700"
+};
+
+const resumoContainer = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "15px",
+  marginBottom: "25px"
+};
+
+const cardResumo = {
+  background: "#fff",
+  borderRadius: "12px",
+  padding: "15px",
+  textAlign: "center",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
 };
 
 const gridPedidos = {

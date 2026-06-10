@@ -9,6 +9,7 @@ export default function Pagamento() {
     const [pedido, setPedido] = useState(null);
     const [metodo, setMetodo] = useState("");
     const [codigoPix, setCodigoPix] = useState("");
+    const [erro, setErro] = useState("");
 
     useEffect(() => {
         const pedidoSalvo = JSON.parse(sessionStorage.getItem("pedido"));
@@ -27,9 +28,11 @@ export default function Pagamento() {
         if (!pedido) return;
 
         if (!metodo) {
-            alert("Selecione um método de pagamento!");
+            setErro("Selecione uma forma de pagamento para continuar.");
             return;
         }
+
+        setErro("");
 
         const pedidoFinal = {
             ...pedido,    
@@ -169,7 +172,10 @@ export default function Pagamento() {
                                 ...styles.opcaoBtn,
                                 background: metodo === "retirada" ? "#c79081" : "#f3e5dc"
                             }}
-                            onClick={() => setMetodo("retirada")}
+                            onClick={() => {
+                                setMetodo("retirada");
+                                setErro("");
+                            }}
                         >
                             💵 Pagar na retirada
                         </button>
@@ -183,6 +189,7 @@ export default function Pagamento() {
                             onClick={() => {
                                 setMetodo("pix");
                                 setCodigoPix(gerarPixFake());
+                                setErro("");
                             }}
                         >
                             📱 PIX
@@ -225,6 +232,24 @@ export default function Pagamento() {
                             </div>
                         )}
                     </div>
+
+                    {erro && (
+                        <div
+                            style={{
+                                background: "#ffebee",
+                                color: "#c62828",
+                                padding: "10px",
+                                borderRadius: "8px",
+                                marginTop: "10px",
+                                marginBottom: "10px",
+                                textAlign: "center",
+                                fontWeight: "bold"
+                            }}
+                        >
+                            {erro}
+                        </div>
+                    )}
+
                     <button 
                         id="confirmarPagamento"
                         style={styles.botao} onClick={finalizarPagamento}>

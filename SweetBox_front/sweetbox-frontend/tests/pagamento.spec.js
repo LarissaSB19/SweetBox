@@ -230,10 +230,10 @@ test.describe('Caso de Teste 03 - Pagamento do Pedido', () => {
 
     // VALIDAR MENSAGEM DE ERRO
     await expect(
-      page.locator('body')
-    ).toContainText(
-      'Selecione uma forma de pagamento para continuar.'
-    );
+      page.getByText(
+        'Selecione uma forma de pagamento para continuar.'
+      )
+    ).toBeVisible();
 
     // SCREENSHOT DA MENSAGEM
     await page.screenshot({

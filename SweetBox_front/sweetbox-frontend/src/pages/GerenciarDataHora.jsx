@@ -270,87 +270,87 @@ export default function GerenciarHorarios() {
 
                 {Object.values(
 
-                [...horarios]
+                    [...horarios]
 
-                    .sort((a, b) => {
+                        .sort((a, b) => {
 
-                        const dataHoraA = new Date(
-                            `${a.data.split("T")[0]}T${a.hora}`
-                        );
+                            const dataHoraA = new Date(
+                                `${a.data.split("T")[0]}T${a.hora}`
+                            );
 
-                        const dataHoraB = new Date(
-                            `${b.data.split("T")[0]}T${b.hora}`
-                        );
+                            const dataHoraB = new Date(
+                                `${b.data.split("T")[0]}T${b.hora}`
+                            );
 
-                        return dataHoraA - dataHoraB;
-                    })
+                            return dataHoraA - dataHoraB;
+                        })
 
-                    .reduce((acc, item) => {
+                        .reduce((acc, item) => {
 
-                        const data = item.data.split("T")[0];
+                            const data = item.data.split("T")[0];
 
-                        if (!acc[data]) {
-                            acc[data] = [];
-                        }
+                            if (!acc[data]) {
+                                acc[data] = [];
+                            }
 
-                        acc[data].push(item);
+                            acc[data].push(item);
 
-                        return acc;
+                            return acc;
 
-                    }, {})
+                        }, {})
 
-            ).map((grupo, index) => {
+                ).map((grupo, index) => {
 
-                const todosHorarios = gerarHorarios().length;
+                    const todosHorarios = gerarHorarios().length;
 
-                const diaCompletoBloqueado =
-                    grupo.length >= todosHorarios;
+                    const diaCompletoBloqueado =
+                        grupo.length >= todosHorarios;
 
-                return (
+                    return (
 
-                    <div
-                        key={index}
-                        style={styles.item}
-                    >
+                        <div
+                            key={index}
+                            style={styles.item}
+                        >
 
-                        <div>
+                            <div>
 
-                            <strong>
-                                {formatarData(grupo[0].data)}
-                            </strong>
+                                <strong>
+                                    {formatarData(grupo[0].data)}
+                                </strong>
 
-                            <p style={styles.hora}>
+                                <p style={styles.hora}>
 
-                                {diaCompletoBloqueado
-                                    ? "🚫 Dia inteiro bloqueado"
-                                    : `🕒 ${grupo
-                                        .map(item => item.hora.substring(0, 5))
-                                        .join(" • ")}`}
+                                    {diaCompletoBloqueado
+                                        ? "🚫 Dia inteiro bloqueado"
+                                        : `🕒 ${grupo
+                                            .map(item => item.hora.substring(0, 5))
+                                            .join(" • ")}`}
 
-                            </p>
+                                </p>
+
+                            </div>
+
+                            <button
+                                style={{
+                                    ...styles.remover,
+                                    background: "#f3e5dc",
+                                    color: "#5a3e36"
+                                }}
+                                onClick={() => {
+
+                                    grupo.forEach(item => {
+                                        removerHorario(item.idHorarioBloqueado);
+                                    });
+
+                                }}
+                            >
+                                Remover
+                            </button>
 
                         </div>
-
-                        <button
-                            style={{
-                                ...styles.remover,
-                                background: "#f3e5dc",
-                                color: "#5a3e36"
-                            }}
-                            onClick={() => {
-
-                                grupo.forEach(item => {
-                                    removerHorario(item.idHorarioBloqueado);
-                                });
-
-                            }}
-                        >
-                            Remover
-                        </button>
-
-                    </div>
-                );
-            })}
+                    );
+                })}
 
             </div>
 
